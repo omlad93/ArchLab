@@ -116,6 +116,7 @@ void set_op_name_by_code(int code, operation* op) {
 	}
 }
 
+
 /*
 load input values to fields in the operation struct
 */
@@ -199,7 +200,6 @@ int st(operation* op, int pc) {
 		MEM[REG[op->src1]] = REG[op->src0]
 		return (pc + 1);
 }
-
 
 
 //16
