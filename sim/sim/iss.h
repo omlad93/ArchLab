@@ -1,5 +1,3 @@
-#define _CRT_SECURE_NO_DEPRECATE
-#include "opp.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,7 +7,7 @@
 #define GOOD 0
 #define MAX_LINE 12
 #define MEM_SIZE 65536
-#define HIG_SHFT = 16
+#define HIG_SHFT 16
 #define OPP_SHFT 25
 #define DST_SHFT 22
 #define SR0_SHFT 19
@@ -19,7 +17,7 @@
 #define SR0_MASK 0x00380000 //bits 21-19
 #define SR1_MASK 0x00070000 //bits 18-16
 #define IMM_MASK 0x0000FFFF //bits 15-0
-#define LOW_MASK = 0x0000FFFF
+#define LOW_MASK 0x0000FFFF
 
 int pc = 0; //trivial
 int REG[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -32,7 +30,6 @@ typedef struct operation {
 	int src1; //src1 register
 	int op_num; // number of op_code
 	char* op_name; //name of op_code
-	int imm_used; // and indicator of using immediate
 	char* inst; // the opcode line from Imem
 	int(*op_code)(struct operation* op, int pc); // a function pointer according to opcode
 } operation;

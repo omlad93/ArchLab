@@ -118,7 +118,6 @@ void set_operation(operation* op, int d, int t, int s, int code, char* inst) {
 	op->op_num = code;
 	op->op_code = set_op_by_code(code, op);
 	op->inst = inst;
-	op->imm_used = imm_usage(op);
 	set_op_name_by_code(code,op);
 
 }
@@ -129,7 +128,7 @@ void set_operation(operation* op, int d, int t, int s, int code, char* inst) {
 //0
 int add(operation* op, int pc) {
 	REG[op->rd] = REG[op->src0] + REG[op->src1];
-	return (pc + 1);
+	return pc + 1;
 
 }
 
@@ -181,13 +180,13 @@ int lhi(operation* op, int pc) {
 
 //8
 int ld(operation* op, int pc) {
-	REG[op->rd] = MEM[REG[op->src1]]];
+	REG[op->rd] = strtol(MEM[REG[op->src1]],NULL,16);
 	return (pc + 1);
 }
 
 //9
 int st(operation* op, int pc) {
-		MEM[REG[op->src1]] = REG[op->src0]
+		sprintf(MEM[REG[op->src1]], "%08X", REG[op->src0]);
 		return (pc + 1);
 }
 
@@ -267,31 +266,31 @@ write to output what opcode has been executed.
 void print_exec_line(int pc, operation* op, FILE* file) {
 	switch (op->op_num) {
 	case(0):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(1):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(2):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(3):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(4):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(5):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(6):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(7):
-		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd REG[op->src0], op->op_name, REG[op->src1]);
+		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(8):
-		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[src1], REG[1]);
+		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[op->src1], REG[1]);
 		return;
 	case(9):
 		fprintf(file, ">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", REG[op->src1], op->src0, REG[op->src0]);
@@ -317,6 +316,7 @@ void print_exec_line(int pc, operation* op, FILE* file) {
 	default:
 		fprintf(file, "");
 		return;
+	}
 }
 
 
@@ -331,15 +331,15 @@ void print_mem_file(FILE* fd) {
 A function to parse operation from instruction memory aka IMEM
 */
 void parse_opcode(char* line, operation* operation, int pc) {
-	int rd, rs, src1, op, im;
+	int rd, src0, src1, op, im;
 	int parsed_line = strtol(&line[0], NULL, 16);
 
 	op = parsed_line & OPP_MASK >> OPP_SHFT;
 	rd = parsed_line & DST_MASK >> DST_SHFT;
 	src0 = parsed_line & SR0_MASK >> SR0_SHFT;
 	src1 = parsed_line & SR1_MASK >> SR1_SHFT;
-	im =  parsed_line & IMM_MASK >> IMM_MASK
-	REG[1] = imm
+	im =  parsed_line & IMM_MASK;
+	REG[1] = im;
 	set_operation(operation, rd, src1, src0, op, line);
 }
 
@@ -350,17 +350,17 @@ void parse_opcode(char* line, operation* operation, int pc) {
 
 
 int main(int argc, char* argv[]) {
-	int j = 0;
+	int j = 0, op_count=0;
 	FILE *input, *trace, *sram_out;
 	char* line = NULL;
 	char read_line[MAX_LINE];
 
-	input = fopen(argv[1],'r');
-	trace = fopen('trace.txt','w');
-	sram_out = fopen('sram_out.txt','w')
+	input = fopen(argv[1],"r");
+	trace = fopen("trace.txt","w");
+	sram_out = fopen("sram_out.txt","w");
 
-	if (input == NULL || trace == NULL || sram_out == NULL ){
-		printf( 'Error opening files');
+	if ((input == NULL) || (trace == NULL) || sram_out == NULL ){
+		printf( "Error opening files");
 		exit(3);
 	}
 
@@ -373,11 +373,11 @@ int main(int argc, char* argv[]) {
 	while (!feof(input)) {
 		fgets(read_line, MAX_LINE, input);
 		read_line[8] = '\0';
-		MEM[j] = read_line;
+		strcpy(MEM[j], read_line);
 		j++;
 	}
 	while (j < MEM_SIZE) {
-		MEM[j] = '00000000';
+		strcpy(MEM[j], "00000000");
 		j++;
 	}
 
@@ -385,7 +385,7 @@ int main(int argc, char* argv[]) {
 
 	while ((-1 < pc) && (pc <= MEM_SIZE)) {
 
-		line = MEM[pc];					 //  get line to parse & operate
+		strcpy(line,MEM[pc]);					 //  get line to parse & operate
 		parse_opcode(line, op, pc);
 		write_trace_file(op, pc, op_count, trace);
 		pc = (op->op_code)(op, pc);
