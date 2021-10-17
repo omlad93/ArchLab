@@ -314,7 +314,7 @@ void print_exec_line(int pc, operation* op, FILE* file) {
 		fprintf(file, ">>>> EXEC: HALT at PC %04x<<<<\n", pc);
 		return;
 	default:
-		fprintf(file, "");
+		fprintf(file, ">>>> EXEC: NOP at PC %04x<<<<\n\n", pc);
 		return;
 	}
 }
@@ -323,7 +323,7 @@ void print_exec_line(int pc, operation* op, FILE* file) {
 void print_mem_file(FILE* fd) {
 	int j;
 	for (j = 0; j < MEM_SIZE; j++) {
-		fprintf(fd, "%08X\n", MEM[j]);
+		fprintf(fd, "%s\n", MEM[j]);
 	}
 }
 
@@ -352,7 +352,7 @@ void parse_opcode(char* line, operation* operation, int pc) {
 int main(int argc, char* argv[]) {
 	int j = 0, op_count=0;
 	FILE *input, *trace, *sram_out;
-	char* line = NULL;
+	char line[MAX_LINE];
 	char read_line[MAX_LINE];
 
 	input = fopen(argv[1],"r");
@@ -385,14 +385,15 @@ int main(int argc, char* argv[]) {
 
 	while ((-1 < pc) && (pc <= MEM_SIZE)) {
 
-		strcpy(line,MEM[pc]);					 //  get line to parse & operate
+		strcpy(line, MEM[pc]);					 //  get line to parse & operate
 		parse_opcode(line, op, pc);
 		write_trace_file(op, pc, op_count, trace);
 		pc = (op->op_code)(op, pc);
 		print_exec_line(pc,op, trace);
 		op_count++;
-		
 	}
+	printf("\nOperation sequance Finished\n ");
+
 	print_mem_file(sram_out);
 	fclose(sram_out);
 	fclose(input);

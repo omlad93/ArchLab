@@ -141,7 +141,7 @@ int main(int argc, char* argv[]) {
 
 	printf("\n\tStarting Operation sequance.\n\t");
 
-	while ((-1 < pc) && (pc <= MEM_SIZE)) {
+	while ((-1 < pc) && (pc < MEM_SIZE)) {
 
 		line = MEM[pc];					 //  get line to parse & operate
 		parse_opcode(line, op, pc);
@@ -151,10 +151,10 @@ int main(int argc, char* argv[]) {
 		op_count++;
 		
 	}
-	print_mem_file(sram_out);
-	fclose(sram_out);
-	fclose(input);
-	fclose(trace);
+	// print_mem_file(sram_out);
+	// fclose(sram_out);
+	// fclose(input);
+	// fclose(trace);
 	printf("\n\n\tSimulator finished running. [v] \n ");
 
 	return GOOD;
