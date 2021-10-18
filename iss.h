@@ -5,6 +5,7 @@
 #include <math.h>
 
 #define GOOD 0
+#define BAD 1
 #define MAX_LINE 12
 #define MEM_SIZE 65536
 #define HIG_SHFT 16
@@ -60,7 +61,7 @@ int write_trace_file(operation* op, int pc, int op_count, FILE* trace);
 /*
 write to output what opcode has been executed. 
 */
-void print_exec_line(int pc, operation* op, FILE* file);
+void print_exec_line(int pc, operation* op, FILE* file, int op_count);
 
 /*
 A function to pasrc0e operation from instruction memory aka IMEM

@@ -248,26 +248,30 @@ int nop(operation*op, int pc) {
 	return pc + 1;
 }
 
+
 /*
 write trace file without exection line
 */
 int write_trace_file(operation* op, int pc, int op_count, FILE* trace) {
-
-	fprintf(trace, "--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",
+	int x =0;
+	x = fprintf(trace, "--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",
 					op_count, op_count, pc, pc);
-	fprintf(trace, "pc = %04i, inst = %s, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n",
+
+	x |= fprintf(trace, "pc = %04i, inst = %s, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n",
 					pc, op->inst, op->op_num, op->op_name, op->rd, op->src0, op->src1, REG[1]);
-	fprintf(trace, "r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
+	x |= fprintf(trace, "r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 					 REG[1], REG[2], REG[3], REG[4], REG[5], REG[6], REG[7]);
-
-
+	if (x==0){
+		printf("(X)");
+		return BAD;
+	}
 	return GOOD;
 }
 
 /*
 write to output what opcode has been executed. 
 */
-void print_exec_line(int pc, operation* op, FILE* file) {
+void print_exec_line(int pc, operation* op, FILE* file, int op_count) {
 	switch (op->op_num) {
 	case(0):
 		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
@@ -316,6 +320,8 @@ void print_exec_line(int pc, operation* op, FILE* file) {
 		return;
 	case(24):
 		fprintf(file, ">>>> EXEC: HALT at PC %04x<<<<\n", op->prev_pc);
+		fprintf(file,"sim finished at pc %i, %i instructions", op->prev_pc, op_count);
+
 		return;
 	default:
 		fprintf(file, ">>>> EXEC: NOP at PC %04x<<<<\n\n", pc);
@@ -362,10 +368,11 @@ int main(int argc, char* argv[]) {
 	printf("\tRunning Simulator:");
 
 	input = fopen(argv[1],"r");
-	trace = fopen("trace.txt","w");
 	sram_out = fopen("sram_out.txt","w");
+	trace = fopen("trace.txt","w");
 
-	if ((argc != 2) || (input == NULL) || (trace == NULL) || sram_out == NULL ){
+
+	if ((argc != 2) || (input == NULL) || (trace == NULL) || (sram_out) == NULL){
 		printf( "Error opening files");
 		exit(3);
 	}
@@ -383,11 +390,12 @@ int main(int argc, char* argv[]) {
 		strcpy(MEM[j], read_line);
 		j++;
 	}
-	fclose(input);
 	while (j < MEM_SIZE) {
 		strcpy(MEM[j], "00000000");
 		j++;
 	}
+
+
 
 	printf("\n\t 2) Starting Operation sequance.");
 	while ((-1 < pc) && (pc <= MEM_SIZE)) {
@@ -395,11 +403,12 @@ int main(int argc, char* argv[]) {
 		parse_opcode(line, op, pc);
 		write_trace_file(op, pc, op_count, trace);
 		pc = (op->op_code)(op, pc);
-		print_exec_line(pc,op, trace);
+		print_exec_line(pc,op, trace, op_count);
 		op_count++;
 	}
-	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count);
+	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
 	print_mem_file(sram_out);
+	fclose(input);
 	fclose(sram_out);
 	fclose(trace);
 	printf("\n\t 4) Simulator finished running. \n ");
