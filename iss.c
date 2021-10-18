@@ -111,13 +111,14 @@ void set_op_name_by_code(int code, operation* op) {
 /*
 load input values to fields in the operation struct
 */
-void set_operation(operation* op, int d, int t, int s, int code, char* inst) {
+void set_operation(operation* op, int d, int t, int s, int code, char* inst, int pc) {
 	op->rd = d;
 	op->src1 = t;
 	op->src0 = s;
 	op->op_num = code;
 	op->op_code = set_op_by_code(code, op);
 	op->inst = inst;
+	op->prev_pc = pc;
 	set_op_name_by_code(code,op);
 
 }
@@ -236,12 +237,14 @@ int jin(operation* op, int pc) {
 
 //24
 int halt(operation* op, int pc) {
-	printf("  > reached halt function [pc=%d]\n\t", pc);
+	// printf("\n\t > reached halt function [pc=%d]\n\t", pc);
+	op->prev_pc = pc;
 	return -1;
 }
 
 //assign to $0
 int nop(operation*op, int pc) {
+	op -> prev_pc = pc;
 	return pc + 1;
 }
 
@@ -250,7 +253,8 @@ write trace file without exection line
 */
 int write_trace_file(operation* op, int pc, int op_count, FILE* trace) {
 
-	fprintf(trace, "--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n", op_count, op_count, pc, pc);
+	fprintf(trace, "--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",
+					op_count, op_count, pc, pc);
 	fprintf(trace, "pc = %04i, inst = %s, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n",
 					pc, op->inst, op->op_num, op->op_name, op->rd, op->src0, op->src1, REG[1]);
 	fprintf(trace, "r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
@@ -311,7 +315,7 @@ void print_exec_line(int pc, operation* op, FILE* file) {
 		fprintf(file, ">>>> EXEC: %s %i, %i, %i <<<<\n\n", op->op_name, REG[op->src0], REG[op->src1], pc);
 		return;
 	case(24):
-		fprintf(file, ">>>> EXEC: HALT at PC %04x<<<<\n", pc);
+		fprintf(file, ">>>> EXEC: HALT at PC %04x<<<<\n", op->prev_pc);
 		return;
 	default:
 		fprintf(file, ">>>> EXEC: NOP at PC %04x<<<<\n\n", pc);
@@ -334,13 +338,13 @@ void parse_opcode(char* line, operation* operation, int pc) {
 	int rd, src0, src1, op, im;
 	int parsed_line = strtol(&line[0], NULL, 16);
 
-	op = parsed_line & OPP_MASK >> OPP_SHFT;
-	rd = parsed_line & DST_MASK >> DST_SHFT;
-	src0 = parsed_line & SR0_MASK >> SR0_SHFT;
-	src1 = parsed_line & SR1_MASK >> SR1_SHFT;
-	im =  parsed_line & IMM_MASK;
+	op = (parsed_line & OPP_MASK) >> OPP_SHFT;
+	rd = (parsed_line & DST_MASK) >> DST_SHFT;
+	src0 = (parsed_line & SR0_MASK) >> SR0_SHFT;
+	src1 = (parsed_line & SR1_MASK) >> SR1_SHFT;
+	im =  (parsed_line & IMM_MASK);
 	REG[1] = im;
-	set_operation(operation, rd, src1, src0, op, line);
+	set_operation(operation, rd, src1, src0, op, line, pc);
 }
 
 
@@ -355,11 +359,13 @@ int main(int argc, char* argv[]) {
 	char line[MAX_LINE];
 	char read_line[MAX_LINE];
 
+	printf("\tRunning Simulator:");
+
 	input = fopen(argv[1],"r");
 	trace = fopen("trace.txt","w");
 	sram_out = fopen("sram_out.txt","w");
 
-	if ((input == NULL) || (trace == NULL) || sram_out == NULL ){
+	if ((argc != 2) || (input == NULL) || (trace == NULL) || sram_out == NULL ){
 		printf( "Error opening files");
 		exit(3);
 	}
@@ -369,6 +375,7 @@ int main(int argc, char* argv[]) {
 		printf("error allocating operation struct");
 		exit(1);
 	}
+	printf("\n\t 1) Reading SRAM.");
 
 	while (!feof(input)) {
 		fgets(read_line, MAX_LINE, input);
@@ -376,15 +383,14 @@ int main(int argc, char* argv[]) {
 		strcpy(MEM[j], read_line);
 		j++;
 	}
+	fclose(input);
 	while (j < MEM_SIZE) {
 		strcpy(MEM[j], "00000000");
 		j++;
 	}
 
-	printf("\n\tStarting Operation sequance.\n\t");
-
+	printf("\n\t 2) Starting Operation sequance.");
 	while ((-1 < pc) && (pc <= MEM_SIZE)) {
-
 		strcpy(line, MEM[pc]);					 //  get line to parse & operate
 		parse_opcode(line, op, pc);
 		write_trace_file(op, pc, op_count, trace);
@@ -392,13 +398,11 @@ int main(int argc, char* argv[]) {
 		print_exec_line(pc,op, trace);
 		op_count++;
 	}
-	printf("\nOperation sequance Finished\n ");
-
+	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count);
 	print_mem_file(sram_out);
 	fclose(sram_out);
-	fclose(input);
 	fclose(trace);
-	printf("\n\n\tSimulator finished running. [v] \n ");
+	printf("\n\t 4) Simulator finished running. \n ");
 
 	return GOOD;
 

@@ -8,10 +8,10 @@
 #define MAX_LINE 12
 #define MEM_SIZE 65536
 #define HIG_SHFT 16
-#define OPP_SHFT 25
-#define DST_SHFT 22
-#define SR0_SHFT 19
-#define SR1_SHFT 16
+#define OPP_SHFT 0x19
+#define DST_SHFT 0x16
+#define SR0_SHFT 0x13
+#define SR1_SHFT 0x10
 #define OPP_MASK 0x3E000000 //bits 29-25
 #define DST_MASK 0x01c00000 //bits 24-22
 #define SR0_MASK 0x00380000 //bits 21-19
@@ -31,6 +31,7 @@ typedef struct operation {
 	int op_num; // number of op_code
 	char* op_name; //name of op_code
 	char* inst; // the opcode line from Imem
+	int prev_pc;
 	int(*op_code)(struct operation* op, int pc); // a function pointer according to opcode
 } operation;
 
@@ -49,7 +50,7 @@ void set_op_name_by_code(int code, operation* op);
 /*
 load input values to fields in the operation struct
 */
-void set_operation(operation* op, int d, int t, int s, int code, char* inst);
+void set_operation(operation* op, int d, int t, int s, int code, char* inst, int pc);
 
 /*
 this function has a debug feature comapring trace file written to a given referance trace
