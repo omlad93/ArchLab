@@ -365,7 +365,7 @@ int main(int argc, char* argv[]) {
 	char line[MAX_LINE];
 	char read_line[MAX_LINE];
 
-	printf("\tRunning Simulator:");
+	printf("\tRunning Simulator(){");
 
 	input = fopen(argv[1],"r");
 	sram_out = fopen("sram_out.txt","w");
@@ -408,10 +408,10 @@ int main(int argc, char* argv[]) {
 	}
 	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
 	print_mem_file(sram_out);
-	fclose(input);
-	fclose(sram_out);
-	fclose(trace);
-	printf("\n\t 4) Simulator finished running. \n ");
+	printf("\n\t 4) File are Written.");
+
+	printf("\n\t}");
+
 
 	return GOOD;
 
