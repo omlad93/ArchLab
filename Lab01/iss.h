@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <math.h>
 
+// Iris Taubkin 208410969
+// Omri Elad    204620702
+
 #define GOOD 0
 #define BAD 1
 #define MAX_LINE 12
@@ -122,4 +125,3 @@ int halt(operation* op, int pc);
 
 //assign to $0 or unreconized behivour 
 int nop(operation*op, int pc);
-

@@ -1,6 +1,9 @@
 #include "iss.h"
 
 
+// Iris Taubkin 208410969
+// Omri Elad    204620702
+
 /*
 set the functions to be performed in the *op_code field in operation struct
 */
@@ -237,7 +240,6 @@ int jin(operation* op, int pc) {
 
 //24
 int halt(operation* op, int pc) {
-	// printf("\n\t > reached halt function [pc=%d]\n\t", pc);
 	op->prev_pc = pc;
 	return -1;
 }
@@ -409,8 +411,6 @@ int main(int argc, char* argv[]) {
 	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
 	print_mem_file(sram_out);
 	printf("\n\t 4) File are Written.");
-
-	printf("\n\n\t >>> %i x %i = %i", MEM[1000], MEM[1001], MEM[1002]);
 
 	return GOOD;
 
