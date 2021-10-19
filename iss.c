@@ -181,7 +181,7 @@ int lhi(operation* op, int pc) {
 
 //8
 int ld(operation* op, int pc) {
-	REG[op->rd] = strtol(MEM[REG[op->src1]],NULL,16);
+	REG[op->rd] = (int)strtol(MEM[REG[op->src1]],NULL,16);
 	return (pc + 1);
 }
 
@@ -298,7 +298,7 @@ void print_exec_line(int pc, operation* op, FILE* file, int op_count) {
 		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(8):
-		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[op->src1], REG[1]);
+		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[op->src1], (int)strtol(MEM[REG[op->src1]],NULL,16));
 		return;
 	case(9):
 		fprintf(file, ">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", REG[op->src1], op->src0, REG[op->src0]);
@@ -342,7 +342,7 @@ A function to parse operation from instruction memory aka IMEM
 */
 void parse_opcode(char* line, operation* operation, int pc) {
 	int rd, src0, src1, op, im;
-	int parsed_line = strtol(&line[0], NULL, 16);
+	int parsed_line = (int)strtol(&line[0], NULL, 16);
 
 	op = (parsed_line & OPP_MASK) >> OPP_SHFT;
 	rd = (parsed_line & DST_MASK) >> DST_SHFT;
@@ -409,9 +409,6 @@ int main(int argc, char* argv[]) {
 	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
 	print_mem_file(sram_out);
 	printf("\n\t 4) File are Written.");
-
-	printf("\n\t}");
-
 
 	return GOOD;
 
