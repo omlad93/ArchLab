@@ -22,7 +22,7 @@
 
 int pc = 0; //trivial
 int REG[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-char MEM[MEM_SIZE][9];
+int MEM[MEM_SIZE];
 
 
 typedef struct operation {

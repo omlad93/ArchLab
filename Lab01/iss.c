@@ -181,13 +181,13 @@ int lhi(operation* op, int pc) {
 
 //8
 int ld(operation* op, int pc) {
-	REG[op->rd] = (int)strtol(MEM[REG[op->src1]],NULL,16);
+	REG[op->rd] = MEM[REG[op->src1]];
 	return (pc + 1);
 }
 
 //9
 int st(operation* op, int pc) {
-		sprintf(MEM[REG[op->src1]], "%08X", REG[op->src0]);
+		MEM[REG[op->src1]] = REG[op->src0];
 		return (pc + 1);
 }
 
@@ -298,7 +298,7 @@ void print_exec_line(int pc, operation* op, FILE* file, int op_count) {
 		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(8):
-		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[op->src1], (int)strtol(MEM[REG[op->src1]],NULL,16));
+		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[op->src1], MEM[REG[op->src1]]);
 		return;
 	case(9):
 		fprintf(file, ">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", REG[op->src1], op->src0, REG[op->src0]);
@@ -333,7 +333,7 @@ void print_exec_line(int pc, operation* op, FILE* file, int op_count) {
 void print_mem_file(FILE* fd) {
 	int j;
 	for (j = 0; j < MEM_SIZE; j++) {
-		fprintf(fd, "%s\n", MEM[j]);
+		fprintf(fd, "%08x\n", MEM[j]);
 	}
 }
 
@@ -343,7 +343,6 @@ A function to parse operation from instruction memory aka IMEM
 void parse_opcode(char* line, operation* operation, int pc) {
 	int rd, src0, src1, op, im;
 	int parsed_line = (int)strtol(&line[0], NULL, 16);
-
 	op = (parsed_line & OPP_MASK) >> OPP_SHFT;
 	rd = (parsed_line & DST_MASK) >> DST_SHFT;
 	src0 = (parsed_line & SR0_MASK) >> SR0_SHFT;
@@ -363,7 +362,7 @@ int main(int argc, char* argv[]) {
 	int j = 0, op_count=0;
 	FILE *input, *trace, *sram_out;
 	char line[MAX_LINE];
-	char read_line[MAX_LINE];
+	// char read_line[MAX_LINE];
 
 	printf("\tRunning Simulator(){");
 
@@ -385,13 +384,14 @@ int main(int argc, char* argv[]) {
 	printf("\n\t 1) Reading SRAM.");
 
 	while (!feof(input)) {
-		fgets(read_line, MAX_LINE, input);
-		read_line[8] = '\0';
-		strcpy(MEM[j], read_line);
+		fscanf(input, "%08x",&MEM[j]);
+		// fgets(read_line, MAX_LINE, input);
+		// read_line[8] = '\0';
+		// strcpy(MEM[j], read_line);
 		j++;
 	}
 	while (j < MEM_SIZE) {
-		strcpy(MEM[j], "00000000");
+		MEM[j] = 0;
 		j++;
 	}
 
@@ -399,7 +399,7 @@ int main(int argc, char* argv[]) {
 
 	printf("\n\t 2) Starting Operation sequance.");
 	while ((-1 < pc) && (pc <= MEM_SIZE)) {
-		strcpy(line, MEM[pc]);					 //  get line to parse & operate
+		sprintf(line, "%08x", MEM[pc]); //  get line to parse & operate
 		parse_opcode(line, op, pc);
 		write_trace_file(op, pc, op_count, trace);
 		pc = (op->op_code)(op, pc);
@@ -409,6 +409,8 @@ int main(int argc, char* argv[]) {
 	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
 	print_mem_file(sram_out);
 	printf("\n\t 4) File are Written.");
+
+	printf("\n\n\t >>> %i x %i = %i", MEM[1000], MEM[1001], MEM[1002]);
 
 	return GOOD;
 
