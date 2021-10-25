@@ -3,12 +3,13 @@ SOURCE	= iss.c
 HEADER	= iss.h
 OUT	= iss.exe
 CC	 = gcc
-LFLAGS	 = 
+FLAGS	 = -g -c -Wall
 
 all: $(OBJS)
-	$(CC) $(OBJS) -o $(OUT)
+	$(CC) -g $(OBJS) -o $(OUT) $(LFLAGS)
+
 iss.o: iss.c
-	$(CC) iss.c 
+	$(CC) $(FLAGS) iss.c 
 
 
 clean:

@@ -58,55 +58,55 @@ void set_op_name_by_code(int code, operation* op) {
 	//else go by opcode
 	switch (code) {
 	case(0):
-		op->op_name = "ADD";
+		sprintf(op->op_name, "ADD");
 		return;
 	case(1):
-		op->op_name = "SUB";
+		sprintf(op->op_name, "SUB");
 		return;
 	case(2):
-		op->op_name = "LSF";
+		sprintf(op->op_name, "LSF");
 		return;
 	case(3):
-		op->op_name = "RSF";
+		sprintf(op->op_name, "RSF");
 		return;
 	case(4):
-		op->op_name = "AND";
+		sprintf(op->op_name, "AND");
 		return;
 	case(5):
-		op->op_name = "OR";
+		sprintf(op->op_name, "OR");
 		return;
 	case(6):
-		op->op_name = "XOR";
+		sprintf(op->op_name,"XOR");
 		return;
 	case(7):
-		op->op_name = "LHI";
+		sprintf(op->op_name, "LHI");
 		return;
 	case(8):
-		op->op_name = "LD";
+		sprintf(op->op_name, "LD");
 		return;
 	case(9):
-		op->op_name = "ST";
+		sprintf(op->op_name, "ST");
 		return;
 	case(16):
-		op->op_name = "JLT";
+		sprintf(op->op_name, "JLT");
 		return;
 	case(17):
-		op->op_name = "JLE";
+		sprintf(op->op_name, "JLE");
 		return;
 	case(18):
-		op->op_name = "JEQ";
+		sprintf(op->op_name, "JEQ");
 		return;
 	case(19):
-		op->op_name = "JNE";
+		sprintf(op->op_name, "JNE");
 		return;
 	case(20):
-		op->op_name = "JIN";
+		sprintf(op->op_name, "JIN");
 		return;
 	case(24):
-		op->op_name = "HLT";
+		sprintf(op->op_name, "HLT");
 		return;
 	default:
-		op->op_name = "NOP";
+		sprintf(op->op_name, "NOP");
 	}
 }
 
@@ -120,7 +120,7 @@ void set_operation(operation* op, int d, int t, int s, int code, char* inst, int
 	op->src0 = s;
 	op->op_num = code;
 	op->op_code = set_op_by_code(code, op);
-	op->inst = inst;
+	sprinf(op->inst, inst);
 	op->prev_pc = pc;
 	set_op_name_by_code(code,op);
 
@@ -255,18 +255,13 @@ int nop(operation*op, int pc) {
 write trace file without exection line
 */
 int write_trace_file(operation* op, int pc, int op_count, FILE* trace) {
-	int x =0;
-	x = fprintf(trace, "--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",
+	fprintf(trace, "--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",
 					op_count, op_count, pc, pc);
 
-	x |= fprintf(trace, "pc = %04i, inst = %s, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n",
+	fprintf(trace, "pc = %04i, inst = %s, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n",
 					pc, op->inst, op->op_num, op->op_name, op->rd, op->src0, op->src1, REG[1]);
-	x |= fprintf(trace, "r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
+	fprintf(trace, "r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n",
 					 REG[1], REG[2], REG[3], REG[4], REG[5], REG[6], REG[7]);
-	if (x==0){
-		printf("(X)");
-		return BAD;
-	}
 	return GOOD;
 }
 
@@ -411,6 +406,13 @@ int main(int argc, char* argv[]) {
 	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
 	print_mem_file(sram_out);
 	printf("\n\t 4) File are Written.");
+	fclose(input);
+	fclose(sram_out);
+	fclose(trace);
+	free(op);
+	// free(input);
+	// free(sram_out);
+	// free(trace);
 
 	return GOOD;
 
