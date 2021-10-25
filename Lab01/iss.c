@@ -120,7 +120,7 @@ void set_operation(operation* op, int d, int t, int s, int code, char* inst, int
 	op->src0 = s;
 	op->op_num = code;
 	op->op_code = set_op_by_code(code, op);
-	sprinf(op->inst, inst);
+	sprintf(op->inst, inst);
 	op->prev_pc = pc;
 	set_op_name_by_code(code,op);
 
