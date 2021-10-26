@@ -143,7 +143,7 @@ static void dump_sram(sp_t *sp)
 }
 
 /*
-	//TODO
+	Our Addition
 */
 static void sp_ctl(sp_t *sp)
 {
@@ -156,7 +156,8 @@ static void sp_ctl(sp_t *sp)
 
 	fprintf(cycle_trace_fp, "cycle %d\n", spro->cycle_counter);
 	for (i = 2; i <= 7; i++){
-	fprintf(cycle_trace_fp, "r%d %08x\n", i, spro->r[i]);}
+		fprintf(cycle_trace_fp, "r%d %08x\n", i, spro->r[i]);
+		}
 	fprintf(cycle_trace_fp, "pc %08x\n", spro->pc);
 	fprintf(cycle_trace_fp, "inst %08x\n", spro->inst);
 	fprintf(cycle_trace_fp, "opcode %08x\n", spro->opcode);
@@ -286,41 +287,11 @@ static void sp_ctl(sp_t *sp)
             } 
 			sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
             sprn->pc += 1;
+			print_trace_file(inst_trace_fp, spro, sprn, data_out);
             break;
     }
 
-    //Print to inst_trace file (taken from ex1)
-    if (spro->ctl_state == 6) //printing at CTL_STATE_EXEC1 only
-	{
-        fprintf(inst_trace_fp,"--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",(spro->cycle_counter)/6 -1, (spro->cycle_counter)/6 -1, spro->pc , spro->pc );
 
-        fprintf(inst_trace_fp,"pc = %04d, inst = %08x, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n", spro->pc , spro->inst,  spro->opcode, opcode_name[spro->opcode], spro->dst, spro->src0, spro->src1, spro->immediate);
-
-        fprintf(inst_trace_fp,"r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \n", (spro->immediate != 0)?spro->immediate:0 , spro->r[2],spro->r[3]);
-
-        fprintf(inst_trace_fp,"r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n", spro->r[4], spro->r[5],spro->r[6], spro->r[7]);
-
-        if (spro->opcode == ADD || spro->opcode == SUB || spro->opcode == LSF || spro->opcode == RSF || spro->opcode == AND || spro->opcode == OR || spro->opcode == XOR || spro->opcode == LHI) {
-            fprintf(inst_trace_fp,">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", spro->dst, spro->alu0, opcode_name[spro->opcode], spro->alu1);
-        } 
-		else if (spro->opcode == LD) 
-		{
-            fprintf(inst_trace_fp,">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", spro->dst, (spro->src1 == 1)?spro->immediate:spro->r[spro->src1], data_out);
-        } 
-		else if (spro->opcode == ST) 
-		{
-            fprintf(inst_trace_fp,">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", (spro->src1 == 1)?spro->immediate:spro->r[spro->src1], spro->src0, spro->r[spro->src0]);
-        } 
-		else if (spro->opcode == JLT || spro->opcode == JLE || spro->opcode == JEQ || spro->opcode == JNE || spro->opcode == JIN) 
-		{
-            fprintf(inst_trace_fp,">>>> EXEC: %s %i, %i, %i <<<<\n\n", opcode_name[spro->opcode], spro->r[spro->src0], spro->r[spro->src1], (spro->aluout == 1)?spro->immediate: spro->pc+1);
-        } 
-		else if (spro->opcode == HLT) 
-		{
-            fprintf(inst_trace_fp, ">>>> EXEC: HALT at PC %04x<<<<\n", spro->pc);
-            fprintf(inst_trace_fp, "sim finished at pc %i, %i instructions\n", spro->pc, (spro->cycle_counter)/6);
-        }
-    }
 }
 
 static void sp_run(llsim_unit_t *unit)
@@ -357,9 +328,7 @@ static void sp_generate_sram_memory_image(sp_t *sp, char *program_name)
         }
 	sp->memory_image_size = addr;
 
-
-        fprintf(inst_trace_fp, "program %s loaded, %d lines\n\n", program_name, addr);
-        
+        fprintf(inst_trace_fp, "program %s loaded, %d lines\n", program_name, addr);        
 
 	for (i = 0; i < sp->memory_image_size; i++)
 		llsim_mem_inject(sp->sram, i, sp->memory_image[i], 31, 0);
@@ -428,9 +397,37 @@ void sp_init(char *program_name)
 	sp_register_all_registers(sp);
 }
 
- 
-/* Op - Codes Functions */
 
+void print_trace_file(FILE* trace, sp_registers_t* spro, sp_registers_t* sprn, int data_out){
+        fprintf(trace,"--- instruction %i (%04x) @ PC %i (%04x) -----------------------------------------------------------\n",
+				(spro->cycle_counter)/6 -1, (spro->cycle_counter)/6 -1, spro->pc , spro->pc );
+        fprintf(trace,"pc = %04d, inst = %08x, opcode = %i (%s), dst = %i, src0 = %i, src1 = %i, immediate = %08x\n",
+				spro->pc , spro->inst,  spro->opcode, opcode_name[spro->opcode], spro->dst, spro->src0, spro->src1, spro->immediate);
+        fprintf(trace,"r[0] = 00000000 r[1] = %08x r[2] = %08x r[3] = %08x \nr[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n\n", 
+				(spro->immediate != 0)?spro->immediate:0 , spro->r[2],spro->r[3], spro->r[4], spro->r[5],spro->r[6], spro->r[7]);
+        if (spro->opcode == ADD || spro->opcode == SUB || spro->opcode == LSF || spro->opcode == RSF || spro->opcode == AND || spro->opcode == OR || spro->opcode == XOR || spro->opcode == LHI) {
+            fprintf(trace,">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", spro->dst, spro->alu0, opcode_name[spro->opcode], spro->alu1);
+        } 
+		else if (spro->opcode == LD) 
+		{
+            fprintf(trace,">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", spro->dst, (spro->src1 == 1)?spro->immediate:spro->r[spro->src1], data_out);
+        } 
+		else if (spro->opcode == ST) 
+		{
+            fprintf(trace,">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", (spro->src1 == 1)?spro->immediate:spro->r[spro->src1], spro->src0, spro->r[spro->src0]);
+        } 
+		else if (spro->opcode == JLT || spro->opcode == JLE || spro->opcode == JEQ || spro->opcode == JNE || spro->opcode == JIN) 
+		{
+            fprintf(trace,">>>> EXEC: %s %i, %i, %i <<<<\n\n", opcode_name[spro->opcode], spro->r[spro->src0], spro->r[spro->src1], (spro->aluout == 1)?spro->immediate: spro->pc+1);
+        } 
+		else if (spro->opcode == HLT) 
+		{
+            fprintf(trace, ">>>> EXEC: HALT at PC %04x<<<<\n", spro->pc);
+            fprintf(trace, "sim finished at pc %i, %i instructions\n", spro->pc, (spro->cycle_counter)/6);
+        }
+    }
+
+/* Op - Codes Functions */
 
 void add_ex0(sp_registers_t* spro, sp_registers_t* sprn) {
 	sprn->aluout = spro->alu0 + spro->alu1;
