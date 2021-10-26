@@ -378,10 +378,12 @@ int main(int argc, char* argv[]) {
 		printf("error allocating operation struct");
 		exit(1);
 	}
+	op -> op_name = (char*)calloc(5, sizeof(char)); //name of op_code
+	op -> inst = (char*)calloc(10, sizeof(char)) ; // the opcode line from Imem
 	printf("\n\t 1) Reading SRAM.");
 
 	while (!feof(input)) {
-		fscanf(input, "%08x",&MEM[j]);
+		fscanf(input, "%08x",&(MEM[j]));
 		// fgets(read_line, MAX_LINE, input);
 		// read_line[8] = '\0';
 		// strcpy(MEM[j], read_line);
@@ -403,12 +405,14 @@ int main(int argc, char* argv[]) {
 		print_exec_line(pc,op, trace, op_count);
 		op_count++;
 	}
-	printf("\n\t 3) Operation sequance Finished: with %s @ %i after %i operations.",op->op_name, pc, op_count-1);
+	printf("\n\t 3) Operation sequance Finished @ %i after %i operations.", pc, op_count-1);
 	print_mem_file(sram_out);
 	printf("\n\t 4) File are Written.");
 	fclose(input);
 	fclose(sram_out);
 	fclose(trace);
+	free(op->op_name);
+	free(op->inst);
 	free(op);
 	// free(input);
 	// free(sram_out);
@@ -418,4 +422,3 @@ int main(int argc, char* argv[]) {
 
 
 }
-

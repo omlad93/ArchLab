@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,7 +9,7 @@
 
 #define GOOD 0
 #define BAD 1
-#define MAX_LINE 20
+#define MAX_LINE 12
 #define MEM_SIZE 65536
 #define HIG_SHFT 16
 #define OPP_SHFT 0x19
@@ -34,8 +33,8 @@ typedef struct operation {
 	int src0; //src0 register
 	int src1; //src1 register
 	int op_num; // number of op_code
-	char op_name[MAX_LINE]; //name of op_code
-	char inst[MAX_LINE]; // the opcode line from Imem
+	char* op_name; //name of op_code
+	char* inst; // the opcode line from Imem
 	int prev_pc;
 	int(*op_code)(struct operation* op, int pc); // a function pointer according to opcode
 } operation;
