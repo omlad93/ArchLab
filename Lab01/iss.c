@@ -295,7 +295,7 @@ void print_exec_line(int pc, operation* op, FILE* file, int op_count) {
 		fprintf(file, ">>>> EXEC: R[%i] = %i %s %i <<<<\n\n", op->rd, REG[op->src0], op->op_name, REG[op->src1]);
 		return;
 	case(8):
-		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08i <<<<\n\n", op->rd, REG[op->src1], MEM[REG[op->src1]]);
+		fprintf(file, ">>>> EXEC: R[%i] = MEM[%i] = %08x <<<<\n\n", op->rd, REG[op->src1], MEM[REG[op->src1]]);
 		return;
 	case(9):
 		fprintf(file, ">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", REG[op->src1], op->src0, REG[op->src0]);
