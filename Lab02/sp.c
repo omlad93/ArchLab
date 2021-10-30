@@ -194,11 +194,14 @@ void halt_ex0() {
 	return;
 	}
 
-void jumps_ex1(sp_registers_t *spro, sp_registers_t *sprn){
+int jumps_ex1(sp_registers_t *spro, sp_registers_t *sprn){
 	if (spro->aluout == 1){
 		sprn->pc = spro->immediate;
 		sprn->r[7] = spro->pc; //Saving the pc from the jump to r[7]
 	}
+	sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
+	return (spro->aluout == 1);
+
 }
 
 int mem_ex1(sp_registers_t *spro, sp_registers_t *sprn, sp_t* sp ){
@@ -211,11 +214,14 @@ int mem_ex1(sp_registers_t *spro, sp_registers_t *sprn, sp_t* sp ){
                 llsim_mem_set_datain(sp->sram, spro->alu0, 31, 0);
                 llsim_mem_write(sp->sram, spro->alu1);
             } 
+	sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
 	return dataout;
 }
 
 void arithmetics_ex1(sp_registers_t *spro, sp_registers_t *sprn){
 	sprn->r[spro->dst] = spro->aluout;
+	sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
+
 }
 
 void print_trace_file(FILE* trace, sp_registers_t *spro, sp_registers_t *sprn, int data_out){
@@ -270,7 +276,12 @@ static void sp_ctl(sp_t *sp)
 	sp_registers_t *spro = sp->spro;
 	sp_registers_t *sprn = sp->sprn;
 	int i;
-	int data_out;
+	int data_out, took_jump;
+	int is_jump, is_arithmetic, is_mem;
+	is_jump = (spro->opcode == JLT || spro->opcode == JLE || spro->opcode == JEQ || spro->opcode == JNE || spro->opcode == JIN);
+	is_arithmetic = (spro->opcode == ADD || spro->opcode == SUB || spro->opcode == LSF || spro->opcode == RSF || spro->opcode == AND || spro->opcode == OR || spro->opcode == XOR || spro->opcode == LHI);
+	is_mem =(spro->opcode == LD || spro->opcode == ST);
+
 
 	// sp_ctl
 
@@ -395,17 +406,20 @@ static void sp_ctl(sp_t *sp)
                 llsim_stop();
                 break;
             } 
-			else if (spro->opcode == LD || spro->opcode == ST){
+			else if (is_mem){
 				data_out = mem_ex1(spro, sprn, sp);
             } 
-			else if (spro->opcode == JLT || spro->opcode == JLE || spro->opcode == JEQ || spro->opcode == JNE || spro->opcode == JIN){
-				jumps_ex1(spro, sprn);
+			else if (is_jump){
+				took_jump = jumps_ex1(spro, sprn);
+				if (took_jump){
+					print_trace_file(inst_trace_fp, spro, sprn, data_out);
+					break;
+				}
+				
 			}
-			else if (spro->opcode == ADD || spro->opcode == SUB || spro->opcode == LSF || spro->opcode == RSF || spro->opcode == AND || spro->opcode == OR || spro->opcode == XOR || spro->opcode == LHI) 
-			{
+			else if (is_arithmetic){
                 arithmetics_ex1(spro, sprn);
             } 
-			sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
             sprn->pc += 1;
 			print_trace_file(inst_trace_fp, spro, sprn, data_out);
             break;
@@ -516,5 +530,3 @@ void sp_init(char *program_name)
 
 	sp_register_all_registers(sp);
 }
-
-
