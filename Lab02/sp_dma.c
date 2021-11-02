@@ -158,8 +158,6 @@ static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR"
 				 "JLT", "JLE", "JEQ", "JNE", "JIN", "U", "U", "U",
 				 "HLT", "U", "U", "U", "U", "U", "U", "U"};
 
-
-
 static void dump_sram(sp_t *sp){
 	FILE *fp;
 	int i;
@@ -277,6 +275,9 @@ void halt_ex1(sp_t *sp){
     llsim_stop();
 }
 
+/* 
+ * perform a single memory copy operation
+*/
 void dma_cpy_step(sp_registers_t *spro, sp_registers_t *sprn){
 	int last_step;
 	sprn->dma_counter = spro->dma_counter + 1;
@@ -286,11 +287,14 @@ void dma_cpy_step(sp_registers_t *spro, sp_registers_t *sprn){
 	last_step = (sprn->dma_counter == sprn->dma_size);
 	if (last_step){
 		sprn->dma_status = 0;
-		sprn->dma_counter =0;
+		sprn->dma_counter = 0;
 	}
 	sprn->dma_state = last_step ? DMA_STATE_IDLE : (mem_is_busy ? DMA_STATE_HOLD : DMA_STATE_READ);
 }
 
+/* 
+ * the DMA state machine
+ */
 void dma_call(sp_t *sp){
 	int mem_extract;
 	sp_registers_t *spro = sp->spro;
@@ -321,6 +325,10 @@ void dma_call(sp_t *sp){
 
 }
 
+/*
+ * a function to prepare for dma operations
+ * modifies the dma variables according to op code.
+*/
 void dma_perp(sp_registers_t *spro, sp_registers_t *sprn, int opcode){
     switch (opcode){
         case CMB:
@@ -377,6 +385,7 @@ void print_trace_file(FILE* trace, sp_registers_t *spro, sp_registers_t *sprn, i
             fprintf(trace, "sim finished at pc %i, %i instructions", spro->pc, (spro->cycle_counter)/6);
         }
     }
+
 /*
 	Our Addition
 */
@@ -425,15 +434,15 @@ static void sp_ctl(sp_t *sp)
             break;
 
         case CTL_STATE_FETCH0:
-			take_mem();
-			dma_call(sp);
+			take_mem(); //take memory because of inst fetch
+			dma_call(sp); // update dma state machine
             llsim_mem_read(sp->sram, spro->pc);
             sprn->ctl_state = CTL_STATE_FETCH1; // update machine state
             break;
 
         case CTL_STATE_FETCH1:
-            free_mem();
-            dma_call(sp);
+            free_mem(); // free memory (last fetch)
+            dma_call(sp); // update dma state machine
             sprn->inst = llsim_mem_extract_dataout(sp->sram, 31, 0);
             sprn->ctl_state = CTL_STATE_DEC0; // update machine state
             break;
@@ -447,12 +456,12 @@ static void sp_ctl(sp_t *sp)
             sprn->ctl_state = CTL_STATE_DEC1; // update machine state
 
             take_mem();
-            dma_call(sp);
+            dma_call(sp); // update dma state machine
             break;
 
         case CTL_STATE_DEC1:
-            dma_perp(spro, sprn, spro->opcode);
-            dma_call(sp);
+            dma_perp(spro, sprn, spro->opcode); //prepare dma for activation according to opcode
+            dma_call(sp); // update dma state machine
             if (spro->opcode == LHI){
                 sprn->alu0 = spro->r[spro->dst]; // leave 16 LSBs
                 sprn->alu1 = spro->immediate;    // load 16 MSBs
@@ -467,7 +476,7 @@ static void sp_ctl(sp_t *sp)
         case CTL_STATE_EXEC0: // perform Operation (without updates)
             dma_kick=0;
             take_mem();
-            dma_call(sp);
+            dma_call(sp); // update dma state machine
 
             switch (spro->opcode){ 
                 case ADD:
@@ -500,10 +509,10 @@ static void sp_ctl(sp_t *sp)
 				case ST:
 					st_ex0(sprn);
 					break;
-                case CMB:
-                    sprn->aluout = spro->dma_status;
+                case CMB: // update aluout with sma_status
                     break;
                 case POL:
+                    sprn->aluout = spro->dma_status;
                     break;
                 case JLT:
                     jlt_ex0(spro, sprn);
