@@ -1,4 +1,4 @@
-program bin/fibo.bin loaded, 1040 lines
+program .\bin\fibo.bin loaded, 1040 lines
 
 --- instruction 0 (0000) @ PC 0 (0000) -----------------------------------------------------------
 pc = 0000, inst = 00810001, opcode = 0 (ADD), dst = 2, src0 = 0, src1 = 1, immediate = 00000001

@@ -183,11 +183,11 @@ void sub_ex0(sp_registers_t *spro, sp_registers_t *sprn) {
 }
 
 void lsf_ex0(sp_registers_t *spro, sp_registers_t *sprn) {
-	sprn->aluout = spro->alu1 << spro->alu0;
+	sprn->aluout = spro->alu0 << spro->alu1;
 }
 
 void rsf_ex0(sp_registers_t *spro, sp_registers_t *sprn) {
-	sprn->aluout = spro->alu1 >> spro->alu0;
+	sprn->aluout = spro->alu0 >> spro->alu1;
 }
 
 void and_ex0(sp_registers_t *spro, sp_registers_t *sprn) {
