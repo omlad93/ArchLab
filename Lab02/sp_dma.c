@@ -25,7 +25,7 @@
 #define SR1_SHF 16
 
 int mem_is_busy = 0;
-
+int dma_work =0;
 #define take_mem() mem_is_busy=1
 #define free_mem() mem_is_busy=0 
 
@@ -233,6 +233,10 @@ void jin_ex0(sp_registers_t *spro, sp_registers_t *sprn) {
 	sprn -> aluout = 1;
 }
 
+void cmb_ex0(sp_registers_t *spro, sp_registers_t *sprn){
+	 sprn->aluout = spro->dma_status;
+}
+
 void halt_ex0() {
 	return;
 	}
@@ -308,7 +312,10 @@ void dma_call(sp_t *sp){
 
 	switch(spro->dma_state){
 		case DMA_STATE_IDLE:
-			sprn->dma_state = sprn->dma_status ? DMA_STATE_HOLD : DMA_STATE_IDLE;
+			if (dma_work){
+				sprn->dma_state =  DMA_STATE_HOLD;
+				sprn->dma_status = 1;
+			}
 			break;
 
 		case DMA_STATE_HOLD:
@@ -318,6 +325,7 @@ void dma_call(sp_t *sp){
 		case DMA_STATE_READ:
 			llsim_mem_read(sp->sram, spro->dma_src);
 			sprn->dma_state = DMA_STATE_COPY;
+			
 			break;
 
 		case DMA_STATE_COPY:
@@ -334,15 +342,16 @@ void dma_call(sp_t *sp){
  * a function to prepare for dma operations
  * modifies the dma variables according to op code.
 */
-void dma_prep(sp_registers_t *spro, sp_registers_t *sprn, int opcode){
-    switch (opcode){
-        case CMB:
+void dma_prep(sp_registers_t *spro, sp_registers_t *sprn){
+    switch (spro->opcode){
+        case CMB:			
 			sprn->dma_status = 1; //for next cycle
-            if (spro->dma_status){
+            if (spro->dma_status == 0 ){
+				dma_work = 1;
                 sprn->dma_src = spro->r[spro->src0];
                 sprn->dma_dst = spro->r[spro->src1];
                 sprn->dma_size = spro->immediate;
-            }
+			}
             break;
         case ST:
             take_mem();
@@ -462,11 +471,11 @@ static void sp_ctl(sp_t *sp)
 
             // take_mem();
             dma_call(sp); // update dma state machine
-			dma_prep(spro, sprn, spro->opcode); //prepare dma for activation according to opcode for  dec1
 
             break;
 
         case CTL_STATE_DEC1:
+			dma_prep(spro, sprn); //prepare dma for activation according to opcode for  dec1
             dma_call(sp); // update dma state machine
             if (spro->opcode == LHI){
                 sprn->alu0 = spro->r[spro->dst]; // leave 16 LSBs
@@ -481,6 +490,7 @@ static void sp_ctl(sp_t *sp)
 
         case CTL_STATE_EXEC0: // perform Operation (without updates)
             take_mem();
+			dma_work = 0;
             dma_call(sp); // update dma state machine
 
             switch (spro->opcode){ 
@@ -515,9 +525,9 @@ static void sp_ctl(sp_t *sp)
 					st_ex0(sprn);
 					break;
                 case CMB: // update aluout with sma_status
-                    break;
+                    cmb_ex0(spro,sprn);
+					break;
                 case POL:
-                    sprn->aluout = spro->dma_status;
                     break;
                 case JLT:
                     jlt_ex0(spro, sprn);
