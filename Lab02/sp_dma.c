@@ -25,7 +25,6 @@
 #define SR1_SHF 16
 
 int mem_is_busy = 0;
-int dma_kick = 0;
 
 #define take_mem() mem_is_busy=1
 #define free_mem() mem_is_busy=0 
@@ -267,6 +266,13 @@ void arithmetics_ex1(sp_registers_t *spro, sp_registers_t *sprn){
 	sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
 }
 
+void dma_ex1(sp_registers_t *spro, sp_registers_t *sprn){
+	if (spro->opcode == CMB){
+			sprn->r[spro->dst] = spro->aluout;
+	}
+	sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
+}
+
 void halt_ex1(sp_t *sp){
 	sp_registers_t *sprn = sp->sprn;
 	sp->start = 0;
@@ -302,8 +308,7 @@ void dma_call(sp_t *sp){
 
 	switch(spro->dma_state){
 		case DMA_STATE_IDLE:
-			sprn->dma_state = dma_kick ? DMA_STATE_HOLD : DMA_STATE_IDLE;
-			sprn->dma_status = dma_kick ? 1 : sprn->dma_status;
+			sprn->dma_state = sprn->dma_status ? DMA_STATE_HOLD : DMA_STATE_IDLE;
 			break;
 
 		case DMA_STATE_HOLD:
@@ -329,11 +334,11 @@ void dma_call(sp_t *sp){
  * a function to prepare for dma operations
  * modifies the dma variables according to op code.
 */
-void dma_perp(sp_registers_t *spro, sp_registers_t *sprn, int opcode){
+void dma_prep(sp_registers_t *spro, sp_registers_t *sprn, int opcode){
     switch (opcode){
         case CMB:
+			sprn->dma_status = 1; //for next cycle
             if (spro->dma_status){
-                dma_kick = 1;
                 sprn->dma_src = spro->r[spro->src0];
                 sprn->dma_dst = spro->r[spro->src1];
                 sprn->dma_size = spro->immediate;
@@ -372,7 +377,7 @@ void print_trace_file(FILE* trace, sp_registers_t *spro, sp_registers_t *sprn, i
             fprintf(trace,">>>> EXEC: MEM[%i] = R[%i] = %08x <<<<\n\n", (spro->src1 == 1)?spro->immediate:spro->r[spro->src1], spro->src0, spro->r[spro->src0]);
         } 
 		else if (spro->opcode == CMB){
-            fprintf(inst_trace_fp, ">>>> EXEC: CMB  %d words from address %04x to adress %04x <<<\n",spro->dma_size, spro->dma_src, spro->dma_dst);
+            fprintf(inst_trace_fp, ">>>> EXEC: CMB  %d words from address %04x to adress %04x <<<\n",spro->dma_size, sprn->dma_src, spro->dma_dst);
         } 
         else if (spro->opcode == POL){
             fprintf(inst_trace_fp, ">>>> EXEC: POL dma status sampled by register %d <<<<\n", spro->dst);
@@ -395,11 +400,11 @@ static void sp_ctl(sp_t *sp)
 	sp_registers_t *sprn = sp->sprn;
 	int i;
 	int data_out, took_jump;
-	int is_jump, is_arithmetic, is_mem, is_dma_copy;
+	int is_jump, is_arithmetic, is_mem, is_dma;
 	is_jump = (spro->opcode == JLT || spro->opcode == JLE || spro->opcode == JEQ || spro->opcode == JNE || spro->opcode == JIN);
 	is_arithmetic = (spro->opcode == ADD || spro->opcode == SUB || spro->opcode == LSF || spro->opcode == RSF || spro->opcode == AND || spro->opcode == OR || spro->opcode == XOR || spro->opcode == LHI);
 	is_mem = (spro->opcode == LD || spro->opcode == ST);
-    is_dma_copy = (spro->opcode == CMB);
+    is_dma = (spro->opcode == CMB || spro->opcode == POL);
 
 
 	// sp_ctl
@@ -455,12 +460,13 @@ static void sp_ctl(sp_t *sp)
             sprn->immediate = spro->inst & IMM_MSK; //check it up
             sprn->ctl_state = CTL_STATE_DEC1; // update machine state
 
-            take_mem();
+            // take_mem();
             dma_call(sp); // update dma state machine
+			dma_prep(spro, sprn, spro->opcode); //prepare dma for activation according to opcode for  dec1
+
             break;
 
         case CTL_STATE_DEC1:
-            dma_perp(spro, sprn, spro->opcode); //prepare dma for activation according to opcode
             dma_call(sp); // update dma state machine
             if (spro->opcode == LHI){
                 sprn->alu0 = spro->r[spro->dst]; // leave 16 LSBs
@@ -474,7 +480,6 @@ static void sp_ctl(sp_t *sp)
             break;
 
         case CTL_STATE_EXEC0: // perform Operation (without updates)
-            dma_kick=0;
             take_mem();
             dma_call(sp); // update dma state machine
 
@@ -561,8 +566,8 @@ static void sp_ctl(sp_t *sp)
 			else if (is_arithmetic){
                 arithmetics_ex1(spro, sprn);
             } 
-            else if (is_dma_copy){
-                sprn->r[spro->dst] = spro->aluout;
+            else if (is_dma){
+                dma_ex1(spro,sprn);
             }
             sprn->pc += 1;
 			print_trace_file(inst_trace_fp, spro, sprn, data_out);
@@ -587,8 +592,7 @@ static void sp_run(llsim_unit_t *unit)
 	sp_ctl(sp);
 }
 
-static void sp_generate_sram_memory_image(sp_t *sp, char *program_name)
-{
+static void sp_generate_sram_memory_image(sp_t *sp, char *program_name){
         FILE *fp;
         int addr, i;
 
@@ -640,8 +644,7 @@ static void sp_register_all_registers(sp_t *sp)
 	llsim_register_register("sp", "ctl_state", 3, 0, &spro->ctl_state, &sprn->ctl_state);
 }
 
-void sp_init(char *program_name)
-{
+void sp_init(char *program_name){
 	llsim_unit_t *llsim_sp_unit;
 	llsim_unit_registers_t *llsim_ur;
 	sp_t *sp;
