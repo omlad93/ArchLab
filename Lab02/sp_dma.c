@@ -99,10 +99,10 @@ typedef struct sp_registers_s {
 	// 32 bit destenation address fo dma
 	int dma_dst;
 
-	#define DMA_STATE_IDLE		7
-	#define DMA_STATE_HOLD		8
-	#define DMA_STATE_COPY		9
-	#define DMA_STATE_READ		10
+	#define DMA_STATE_IDLE		0
+	#define DMA_STATE_HOLD		1
+	#define DMA_STATE_COPY		2
+	#define DMA_STATE_READ		3
 
 
 } sp_registers_t;
@@ -274,6 +274,9 @@ void dma_ex1(sp_registers_t *spro, sp_registers_t *sprn){
 	if (spro->opcode == CMB){
 			sprn->r[spro->dst] = spro->aluout;
 	}
+	if (spro->opcode == POL){
+			sprn->r[spro->dst] = spro->dma_status;
+	}
 	sprn->ctl_state = CTL_STATE_FETCH0; // update machine state
 }
 
@@ -344,7 +347,8 @@ void dma_call(sp_t *sp){
 */
 void dma_prep(sp_registers_t *spro, sp_registers_t *sprn){
     switch (spro->opcode){
-        case CMB:			
+        case CMB:
+			//sprn->dma_state = DMA_STATE_IDLE;		
 			sprn->dma_status = 1; //for next cycle
             if (spro->dma_status == 0 ){
 				dma_work = 1;
@@ -528,6 +532,7 @@ static void sp_ctl(sp_t *sp)
                     cmb_ex0(spro,sprn);
 					break;
                 case POL:
+					cmb_ex0(spro,sprn);
                     break;
                 case JLT:
                     jlt_ex0(spro, sprn);
