@@ -284,7 +284,7 @@ static void sp_ctl(sp_t *sp)
 	sp_registers_t *spro = sp->spro;
 	sp_registers_t *sprn = sp->sprn;
 	int i;
-	int data_out, took_jump;
+	int took_jump, data_out=0;
 	int is_jump, is_arithmetic, is_mem;
 	is_jump = (spro->opcode == JLT || spro->opcode == JLE || spro->opcode == JEQ || spro->opcode == JNE || spro->opcode == JIN);
 	is_arithmetic = (spro->opcode == ADD || spro->opcode == SUB || spro->opcode == LSF || spro->opcode == RSF || spro->opcode == AND || spro->opcode == OR || spro->opcode == XOR || spro->opcode == LHI);
