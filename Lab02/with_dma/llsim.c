@@ -352,7 +352,7 @@ int main(int argc, char **argv)
 	}
 	llsim->reset = 0;
 	while (!stop_sim) {
-		printf(">>>>> clock %d <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n", llsim->clock);
+		//printf(">>>>> clock %d <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n", llsim->clock);
 		llsim_run_clock();
 		llsim->clock++;
 		/*
