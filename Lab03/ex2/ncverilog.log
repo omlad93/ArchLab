@@ -1,0 +1,91 @@
+ncverilog(64): 15.20-s085: (c) Copyright 1995-2020 Cadence Design Systems, Inc.
+TOOL:	ncverilog	15.20-s085: Started on Nov 09, 2021 at 09:58:07 IST
+ncverilog
+	+access+rw
+	halfadder_tb.v
+	halfadder.v
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
+|
+ncsim: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
+DEFINE Cadence_libs ./Cadence_libs
+|
+ncsim: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
+ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
+|
+ncsim: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
+Loading snapshot worklib.main:v .................... Done
+ncsim> source /tools/cadence/INCISIVE/15.20.085/tools/inca/files/ncsimrc
+ncsim> run
+time=                   0:0 + 0 = 0, carry = 0
+
+time=                   5:0 + 1 = 1, carry = 0
+
+time=                  15:1 + 1 = 0, carry = 1
+
+Simulation complete via $finish(1) at time 20 NS + 0
+./halfadder_tb.v:23             $finish;
+ncsim> exit
+TOOL:	ncverilog	15.20-s085: Exiting on Nov 09, 2021 at 09:58:07 IST  (total: 00:00:00)
