@@ -2,7 +2,7 @@ module main;
    reg in, clk, reset;
    wire out;
 
-   parity par(clk, in, reset, out)
+   parity par(clk, in, reset, out);
 
    always #5 clk = ~clk;
 
