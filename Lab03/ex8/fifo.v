@@ -25,7 +25,7 @@ module fifo(clk, reset, in, push, pop, out, full);
 		end
 		else begin : operations
 
-			word_out <=  ((1 << M) - 1) & queue; // create M times '1' in LSB's and padded with 32-M '0' LSB's
+			word_out <=  (ones & queue; // create M times '1' in LSB's and padded with 32-M '0' LSB's
 
 			if (n == 0) begin : empty_queue
 				if (push == 1) begin : first_push
