@@ -1,13 +1,13 @@
-module fifo(clk, reset, in, push, pop, out, full, debug_queue);
+module fifo(clk, reset, in, push, pop, out, full);
    parameter N=4; // determines the maximum number of words in queue.
    parameter M=2; // determines the bit-width of each word, stored in the queue.
-
-	localparam zero = 0;
    
+   localparam zero = 0 ;
+
    input clk, reset, push, pop;
    input [M-1:0] in;
    output [M-1:0] out;
-   output [M*N-1:0] debug_queue;
+//    output [M*N-1:0] debug_queue;
    output full;
 
    
@@ -32,9 +32,13 @@ module fifo(clk, reset, in, push, pop, out, full, debug_queue);
 
 			if (n == 0) begin : empty_queue
 				if (push == 1) begin : first_push // verified
+					word_out <= in;
 					queue <= (in << (M*(N-1))) | queue ;
 					n <= 1;
-				end
+				end else
+					if (push == 0) begin: zero_out
+						word_out <= zero ;
+					end
 			end
 			else begin
 				if( n < N) begin : common_rutine // n from 1 to N-1
@@ -44,6 +48,7 @@ module fifo(clk, reset, in, push, pop, out, full, debug_queue);
 						n <= n - 1;
 					end else;
 					if (pop == 0 && push == 1) begin : push_common // verified
+						word_out <= (queue >>> (N-n)*M) ;
 						queue <= (in << (M*(N-1))) | queue >>> M ;
 						n <= n + 1;
 						if (n == N-1) begin: raise_full
@@ -78,7 +83,7 @@ module fifo(clk, reset, in, push, pop, out, full, debug_queue);
 		end
 	end
 	assign full = is_full;
-	assign debug_queue = queue;
-    assign out = (pop) ? word_out : zero;
+	// assign debug_queue = queue;
+    assign out = word_out;
 	
 endmodule
