@@ -1,7 +1,0 @@
-s1(09Nov2021:09:37:48):  ncverilog +access+rw halfadder_tb.v halfadder.v 
-s2(09Nov2021:09:41:47):  ncverilog +access+rw halfadder_tb.v halfadder.v 
-s3(09Nov2021:09:43:55):  ncverilog +access+rw halfadder_tb.v halfadder.v 
-s4(09Nov2021:09:45:38):  ncverilog +access+rw halfadder_tb.v halfadder.v 
-s5(09Nov2021:09:45:53):  ncverilog +access+rw halfadder_tb.v halfadder.v 
-s6(09Nov2021:09:58:07):  ncverilog +access+rw halfadder_tb.v halfadder.v 
-s7(16Nov2021:09:13:40):  ncverilog +access+rw halfadder_tb.v halfadder.v 

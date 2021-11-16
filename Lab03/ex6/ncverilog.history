@@ -3,3 +3,4 @@ s2(09Nov2021:10:49:28):  ncverilog +access+rw parity_tb.v parity.v
 s3(09Nov2021:10:49:58):  ncverilog +access+rw parity_tb.v parity.v 
 s4(09Nov2021:10:50:15):  ncverilog +access+rw parity_tb.v parity.v 
 s5(09Nov2021:10:50:47):  ncverilog +access+rw parity_tb.v parity.v 
+s6(16Nov2021:09:32:14):  ncverilog +access+rw parity_tb.v parity.v 
