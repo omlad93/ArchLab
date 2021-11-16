@@ -85,7 +85,7 @@ if (out != 2'b10 || full != 1) fail <= 12;
 if (out != 2'b10 || full != 1) fail <= 13;
 // pop (11) & push (01)
 #10; pop =1; push = 1; in = 1 ;  print = print+1; #10; pop=0; push=0; #20
-if (out != 2'b11 || full != 1) fail <= 13;
+if (out != 2'b11 || full != 1) fail <= 14;
 
 
 #10 

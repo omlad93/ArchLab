@@ -4,10 +4,10 @@ module	addsub_tb;
 	reg					mode;
 	reg 	[3:0]	operand_a, operand_b;
 	wire	[3:0] result;
-	wire co;
+	// wire co;
 	
 	// for pattern generation
-	integer			a, b, expect, error_num, t;
+	integer			a, b, expect, error_num;
 	reg					overflow;
 	wire	[3:0]	expect_out = expect[3:0];	// compare "expect_out" with "result"
 

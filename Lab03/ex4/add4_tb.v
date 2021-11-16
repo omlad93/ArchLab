@@ -2,10 +2,9 @@ module main;
     reg [3:0] a,b;
     reg ci;
     wire [3:0]sum;
-    wire carry;
     add4 adder4(sum, co, a, b, ci);
 
-    always@(sum or carry)
+    always@(sum or co)
         begin
             $display("time=%d:%b + %b + %b = %b, carry = %b\n", $time, a, b, ci, sum, co);
         end
