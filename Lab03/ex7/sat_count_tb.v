@@ -1,7 +1,7 @@
 module main;
 
 reg clk, reset, branch, taken;
-reg ans;
+reg ans, fail;
 wire prediction;
 
 sat_count counter(clk, reset, branch, taken, prediction);
@@ -13,6 +13,7 @@ initial begin
 	$dumpvars;
     clk = 0;
     ans = 1;
+    fail = 1;
     branch = 0;
     taken = 0;
 
@@ -22,6 +23,7 @@ initial begin
 
     // FIRST TEST
     ans = ans & (~prediction); //prediction should be 0 --> ans should be 1
+    fail = fail & ans;
     if (ans) begin
         $display("PASS first test");
     end
@@ -39,6 +41,8 @@ initial begin
     ans = ans & (prediction); //prediction should be 1 --> ans should be 1
     #20;
     ans = ans & (prediction); //prediction should be 1 --> ans should be 1
+
+    fail = fail & ans;
 
     if (ans) begin
         $display("PASS second test");
@@ -58,6 +62,8 @@ initial begin
     #20;
     ans = ans & (~prediction); //prediction should be 0 --> ans should be 1
 
+    fail = fail & ans;
+
     if (ans) begin
         $display("PASS third test");
     end
@@ -68,8 +74,17 @@ initial begin
     ans = 1;
     #20;
     ans = ans & (~prediction); //prediction should be 0 --> ans should be 1
+
+    fail = fail & ans;
+
     if (ans) begin
         $display("PASS fourth test");
+    end
+
+    #10
+
+    if (fail) begin
+        $display("PASSED ALL TESTS");
     end
 
     #10
