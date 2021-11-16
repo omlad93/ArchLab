@@ -1,0 +1,2 @@
+include ../../../../../../../../../../../../tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib
+define worklib ../worklib

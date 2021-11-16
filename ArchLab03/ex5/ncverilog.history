@@ -1,0 +1,3 @@
+s1(16Nov2021:09:17:04):  ncverilog +access+rw addsub_tb.v addsub.v 
+s2(16Nov2021:09:27:22):  ncverilog +access+rw addsub_tb.v addsub.v 
+s3(16Nov2021:09:30:21):  ncverilog +access+rw addsub_tb.v addsub.v 

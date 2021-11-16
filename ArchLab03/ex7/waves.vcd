@@ -1,0 +1,425 @@
+$date
+    Nov 16, 2021  09:38:50
+$end
+$version
+    TOOL:	ncsim(64)	15.20-s085
+$end
+$timescale
+    1 ns
+$end
+
+$scope module main $end
+$var reg       1 !    clk  $end
+$var reg       1 "    reset  $end
+$var reg       1 #    branch  $end
+$var reg       1 $    taken  $end
+$var reg       1 %    ans  $end
+$var reg       1 &    fail  $end
+$var wire      1 '    prediction  $end
+
+$scope module counter $end
+$var parameter 32 (    N  $end
+$var wire      1 )    clk  $end
+$var wire      1 *    reset  $end
+$var wire      1 +    branch  $end
+$var wire      1 ,    taken  $end
+$var wire      1 '    prediction  $end
+$var reg       4 -    counter [3:0] $end
+$var wire      1 .    next_counter [3] $end
+$var wire      1 /    next_counter [2] $end
+$var wire      1 0    next_counter [1] $end
+$var wire      1 1    next_counter [0] $end
+$var reg       4 2    exp_N [3:0] $end
+$var reg       4 3    one [3:0] $end
+
+$scope module addsub $end
+$var wire      1 4    operand_a [3] $end
+$var wire      1 5    operand_a [2] $end
+$var wire      1 6    operand_a [1] $end
+$var wire      1 7    operand_a [0] $end
+$var wire      1 8    operand_b [3] $end
+$var wire      1 9    operand_b [2] $end
+$var wire      1 :    operand_b [1] $end
+$var wire      1 ;    operand_b [0] $end
+$var wire      1 <    mode  $end
+$var wire      1 .    result [3] $end
+$var wire      1 /    result [2] $end
+$var wire      1 0    result [1] $end
+$var wire      1 1    result [0] $end
+$var wire      1 =    co  $end
+$var wire      1 >    xor_b [3] $end
+$var wire      1 ?    xor_b [2] $end
+$var wire      1 @    xor_b [1] $end
+$var wire      1 A    xor_b [0] $end
+
+$scope module m1 $end
+$var wire      1 4    a [3] $end
+$var wire      1 5    a [2] $end
+$var wire      1 6    a [1] $end
+$var wire      1 7    a [0] $end
+$var wire      1 >    b [3] $end
+$var wire      1 ?    b [2] $end
+$var wire      1 @    b [1] $end
+$var wire      1 A    b [0] $end
+$var wire      1 <    ci  $end
+$var wire      1 .    sum [3] $end
+$var wire      1 /    sum [2] $end
+$var wire      1 0    sum [1] $end
+$var wire      1 1    sum [0] $end
+$var wire      1 =    co  $end
+$var wire      1 B    c0  $end
+$var wire      1 C    c1  $end
+$var wire      1 D    c2  $end
+
+$scope module fa0 $end
+$var wire      1 7    a  $end
+$var wire      1 A    b  $end
+$var wire      1 <    ci  $end
+$var wire      1 1    sum  $end
+$var wire      1 B    co  $end
+$var wire      1 E    x  $end
+$var wire      1 F    y  $end
+$var wire      1 G    z  $end
+$upscope $end
+
+
+$scope module fa1 $end
+$var wire      1 6    a  $end
+$var wire      1 @    b  $end
+$var wire      1 B    ci  $end
+$var wire      1 0    sum  $end
+$var wire      1 C    co  $end
+$var wire      1 H    x  $end
+$var wire      1 I    y  $end
+$var wire      1 J    z  $end
+$upscope $end
+
+
+$scope module fa2 $end
+$var wire      1 5    a  $end
+$var wire      1 ?    b  $end
+$var wire      1 C    ci  $end
+$var wire      1 /    sum  $end
+$var wire      1 D    co  $end
+$var wire      1 K    x  $end
+$var wire      1 L    y  $end
+$var wire      1 M    z  $end
+$upscope $end
+
+
+$scope module fa3 $end
+$var wire      1 4    a  $end
+$var wire      1 >    b  $end
+$var wire      1 D    ci  $end
+$var wire      1 .    sum  $end
+$var wire      1 =    co  $end
+$var wire      1 N    x  $end
+$var wire      1 O    y  $end
+$var wire      1 P    z  $end
+$upscope $end
+
+$upscope $end
+
+$upscope $end
+
+$upscope $end
+
+$upscope $end
+
+$enddefinitions $end
+$dumpvars
+b10 (
+0!
+1"
+0#
+0$
+1%
+1&
+x'
+0)
+1*
+0+
+0,
+bx -
+x.
+x/
+x0
+x1
+b11 2
+b1 3
+x4
+x5
+x6
+x7
+08
+09
+0:
+1;
+1<
+x=
+1>
+1?
+1@
+0A
+xB
+xC
+xD
+xE
+xF
+0G
+xH
+xI
+xJ
+xK
+xL
+xM
+xN
+xO
+xP
+$end
+#5
+1!
+1)
+b0 -
+04
+05
+06
+07
+0'
+0E
+0F
+0B
+1H
+0J
+0I
+0C
+1K
+0M
+0L
+0D
+1N
+0P
+0O
+0=
+1.
+1/
+10
+11
+#10
+0!
+0)
+#15
+1!
+1)
+#20
+0"
+0!
+0)
+0*
+#25
+1!
+1)
+#30
+0!
+0)
+#35
+1!
+1)
+#40
+1$
+1#
+0!
+0)
+1+
+1,
+0<
+0>
+0?
+0@
+1A
+11
+1E
+0H
+0K
+0N
+0.
+0/
+00
+#45
+1!
+1)
+b1 -
+17
+0E
+1G
+1B
+10
+01
+#50
+0!
+0)
+#55
+1!
+1)
+b10 -
+16
+07
+1'
+1E
+0G
+0B
+1H
+11
+#60
+0!
+0)
+#65
+1!
+1)
+b11 -
+17
+0E
+1G
+1B
+00
+1I
+1C
+01
+1/
+#70
+0!
+0)
+#75
+1!
+1)
+#80
+0!
+0)
+#85
+1!
+1)
+#90
+0!
+0)
+#95
+1!
+1)
+#100
+0!
+0)
+#105
+1!
+1)
+#110
+0$
+0!
+0)
+0,
+1<
+1>
+1?
+1@
+0A
+01
+0G
+1B
+10
+1E
+0H
+1J
+0I
+1K
+1L
+1D
+1N
+1O
+1=
+0/
+1F
+#115
+1!
+1)
+b10 -
+07
+0E
+0F
+0B
+00
+11
+#120
+0!
+0)
+#125
+1!
+1)
+b1 -
+06
+17
+0'
+1E
+1F
+1B
+1H
+0J
+1I
+01
+#130
+0!
+0)
+#135
+1!
+1)
+b0 -
+07
+0E
+0F
+0B
+10
+0I
+0C
+11
+1/
+0L
+0D
+1.
+0O
+0=
+#140
+0!
+0)
+#145
+1!
+1)
+#150
+0!
+0)
+#155
+1!
+1)
+#160
+0#
+0!
+0)
+0+
+#165
+1!
+1)
+#170
+0!
+0)
+#175
+1!
+1)
+#180
+0!
+0)
+#185
+1!
+1)
+#190
+0!
+0)
+#195
+1!
+1)
+#200
