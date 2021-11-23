@@ -7,6 +7,15 @@
 `define CTL_STATE_EXEC0 5
 `define CTL_STATE_EXEC1 6
 
+// DMA states
+`define DMA_STATE_IDLE 0
+`define DMA_STATE_FETCH0 1
+`define DMA_STATE_FETCH1 2
+`define DMA_STATE_DEC0 3
+`define DMA_STATE_DEC1 4
+`define DMA_STATE_EXEC0 5
+`define DMA_STATE_EXEC1 6
+
 // opcodes
 `define ADD 0
 `define SUB 1
@@ -18,6 +27,8 @@
 `define LHI 7
 `define LD 8
 `define ST 9
+`define CMB 10 // Copy Memory Background
+`define POL 11 // Poll DMA transaction
 `define JLT 16
 `define JLE 17
 `define JEQ 18

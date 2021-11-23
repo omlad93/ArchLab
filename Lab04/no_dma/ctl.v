@@ -239,7 +239,7 @@ module CTL(
 		end // !reset
     end // @posedge(clk)
 
-	always@(ctl_state or sram_ADDR or sram_DI or sram_EN or sram_WE)  begin : sram_routine
+	always@(ctl_state)  begin : sram_routine
      	sram_ADDR = 0;
 		sram_DI = 0;
 		sram_EN = 0;

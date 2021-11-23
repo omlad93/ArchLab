@@ -55,6 +55,17 @@ module CTL(
 	reg [31:0] 	 cycle_counter;
 	reg [2:0] 	 ctl_state;
 
+	// DMA 
+	reg [2:0]    dma_state;
+   	reg [1:0]	 dma_wr;
+	reg [31:0]   dma_start;
+	reg [31:0]   dma_end;
+   	reg [31:0]   dma_busy;
+   	reg [31:0]   dma_size;
+   	reg [31:0]   dma_data;
+   	reg [31:0]   dma_counter;
+
+
 	integer 	 verilog_trace_fp, rc;
 
 	initial begin : trace_file
@@ -62,8 +73,8 @@ module CTL(
 	end
 
 	/***********************************
-		* set up sram inputs (outputs from sp)
-		**********************************/
+	* set up sram inputs (outputs from sp)
+	**********************************/
 	reg [15:0] 	sram_ADDR;
 	reg [31:0] 	sram_DI;
 	reg 	 	sram_EN;
@@ -92,6 +103,17 @@ module CTL(
 			immediate <= 0;
 			cycle_counter <= 0;
 			ctl_state <= 0;
+			//dma dditions
+			dma_state <= 0;
+			dma_wr <= 0;
+			dma_start <= 0;
+			dma_end <= 0;
+			dma_busy <= 0;
+			dma_size <= 0;
+			dma_data <= 0;
+			dma_counter <= 0;
+
+
 		end else begin :non_reset
 			// generate cycle trace
 			$fdisplay(verilog_trace_fp, "cycle %0d", cycle_counter);
@@ -113,6 +135,11 @@ module CTL(
 			$fdisplay(verilog_trace_fp, "aluout %08x", aluout);
 			$fdisplay(verilog_trace_fp, "cycle_counter %08x", cycle_counter);
 			$fdisplay(verilog_trace_fp, "ctl_state %08x\n", ctl_state);
+			//dma additions
+			$fdisplay(verilog_trace_fp, "dma_state %08x", dma_state); 				
+			$fdisplay(verilog_trace_fp, "dma_status %08x", dma_busy); 				
+			$fdisplay(verilog_trace_fp, "DMA_transfer_counter %08x", dma_counter); 	
+
 
 			cycle_counter <= cycle_counter + 1;
 
@@ -218,6 +245,27 @@ module CTL(
 							endcase
 						end
 
+						`CMB : begin : dma_copy
+							if (dma_state == `DMA_STATE_IDLE) begin : kick_dma
+								dma_state <= `DMA_STATE_FETCH0;
+								dma_size  <= immediate;
+								dma_start <= alu0;
+								dma_end	  <= alu1;
+								dma_counter <= 0;
+							end 
+						end
+
+						`POL : begin : polling
+							case(dst)
+								2: r2 <= dma_size;
+								3: r3 <= dma_size;	
+								4: r4 <= dma_size;				  			     		
+								5: r5 <= dma_size;	
+								6: r6 <= dma_size;	
+ 								7: r7 <= dma_size;
+							endcase
+						end
+
 						`ST: begin : storing
 
 						end
@@ -236,14 +284,45 @@ module CTL(
 
 			endcase
 
+			case (dma_state)
+				`DMA_STATE_IDLE: begin : nothingg
+					// nothing
+				end
+
+				`DMA_STATE_FETCH0: begin : fetch_dma
+					dma_state <= `DMA_STATE_FETCH1;
+				end 
+
+				`DMA_STATE_FETCH1: begin : fetch1_dma
+					dma_state <= `DMA_STATE_DEC0;
+				end
+
+				`DMA_STATE_DEC0: begin : dec0_dma
+					dma_state <= `DMA_STATE_DEC1;
+				end
+
+				`DMA_STATE_DEC1: begin : dec1_dma
+					dma_data <= (dma_wr == 0) ? sram_DO : dma_data;
+					dma_state <= `DMA_STATE_EXEC0;
+				end
+
+				`DMA_STATE_EXEC0: begin : ex0_dma
+					dma_state <= `DMA_STATE_EXEC1;
+				end
+
+				`DMA_STATE_EXEC1: begin : ex1_dma
+					dma_size = (dma_size != 0) ? dma_size + 1 : dma_size;
+					dma_counter = dma_counter +1;
+					dma_start <= dma_start + 1;
+					dma_end <= dma_end + 1;
+					dma_state = (dma_size > 0) ? `DMA_STATE_FETCH0 :  `DMA_STATE_IDLE;
+				end
+			endcase
+
 		end // !reset
     end // @posedge(clk)
 
-	always@(ctl_state or sram_ADDR or sram_DI or sram_EN or sram_WE)  begin : sram_routine
-     	sram_ADDR = 0;
-		sram_DI = 0;
-		sram_EN = 0;
-		sram_WE = 0;
+	always@(ctl_state) begin : sram_routine
      	case (ctl_state)
 			`CTL_STATE_FETCH0: begin
 				sram_ADDR = pc[15:0];
@@ -252,8 +331,7 @@ module CTL(
 				sram_WE = 0;
 			end
 			`CTL_STATE_EXEC0: begin
-				if (opcode == `LD) //If we got LD opcode
-				begin
+				if (opcode == `LD) begin
 					sram_ADDR = alu1[15:0];
 					sram_DI = 0;
 					sram_EN = 1;
@@ -261,8 +339,7 @@ module CTL(
 				end
 			end
 			`CTL_STATE_EXEC1: begin
-				if (opcode == `ST) //If we got ST opcode
-				begin
+				if (opcode == `ST) begin
 					sram_ADDR = alu1[15:0];
 					sram_DI = alu0;
 					sram_EN = 1;
@@ -276,6 +353,26 @@ module CTL(
 				sram_WE = 0;
 			end
      	endcase
-	end
+	end //sram_routine
+
+	always @(dma_state) begin : dma_routine
+
+		dma_busy = dma_state != `DMA_STATE_IDLE;
+
+		if ((dma_state == `DMA_STATE_DEC0) & (dma_wr == 0)) begin : set_dma_wr
+				dma_wr = 1;
+				sram_ADDR = dma_start[15:0];
+				sram_DI = 0;
+				sram_EN = 1;
+				sram_WE = 0;
+		end else if (dma_state == `DMA_STATE_DEC1) begin : when_dma_wr
+			dma_wr = 0;
+			sram_ADDR = dma_end[15:0];
+			sram_DI = dma_data;
+			sram_EN = 1;
+			sram_WE = 1;
+		end
+		
+	end //dma_routine
 
 endmodule // CTL
