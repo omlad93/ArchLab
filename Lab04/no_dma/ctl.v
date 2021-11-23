@@ -124,26 +124,22 @@ module CTL(
 				end
 				
 				// Our implementation: 
+
 				`CTL_STATE_FETCH0: begin : load_op_from_mem
-					sram_ADDR = pc[15:0];
-					sram_DI = 	 0;
-					sram_EN = 	 1;
-					sram_WE = 	 0;
+
 					ctl_state <= `CTL_STATE_FETCH1;
 				end 
 
 				`CTL_STATE_FETCH1: begin : load_op_to_reg
 					inst <= sram_DO;
-					ctl_state <= `CTL_STATE_DEC0;
-					sram_ADDR = 0; //reseet sram inputs
-					sram_DI = 0;   //reseet sram inputs
-					sram_EN = 0;	//reseet sram inputs
-					sram_WE = 0;	//reseet sram inputs
-					
+					ctl_state <= `CTL_STATE_DEC0;				
 				end
 
 				`CTL_STATE_DEC0: begin : parse_opcode_to_regs
-					immediate <= inst[15];
+					if (inst[15])
+						immediate <= inst|((~(32'b0))<<16);
+					else
+						immediate <= inst[15:0];
 					src1 <= inst[18:16];
 					src0 <= inst[21:19];
 					dst <= inst[24:22];
@@ -178,17 +174,9 @@ module CTL(
 				end
 
 				`CTL_STATE_EXEC0: begin : exec0
-					pc <= pc+1;
 					case(opcode)
-						`ST, `HLT: begin : nop
+						`ST, `HLT, `LD: begin : nop
 							// nothing
-						end
-							
-						`LD: begin : load
-							sram_ADDR = alu1[15:0];
-							sram_DI = 	 0;
-							sram_EN = 	 1;
-							sram_WE = 	 0;
 						end
 
 						default:  begin: compute
@@ -231,10 +219,7 @@ module CTL(
 						end
 
 						`ST: begin : storing
-							sram_ADDR = alu1[15:0];
-							sram_DI =	 alu0;
-							sram_EN = 	 1;
-							sram_WE = 	 1;
+
 						end
 
 						`HLT: begin : halt
@@ -251,13 +236,46 @@ module CTL(
 
 			endcase
 
-			// if (opcode == `HLT) begin
-			// 	$fclose(verilog_trace_fp);
-			// 	$writememh("verilog_sram_out.txt", top.SP.SRAM.mem);
-			// 	$finish;
-			// end
-
 		end // !reset
     end // @posedge(clk)
+
+	always@(ctl_state or sram_ADDR or sram_DI or sram_EN or sram_WE)  begin : sram_routine
+     	sram_ADDR = 0;
+		sram_DI = 0;
+		sram_EN = 0;
+		sram_WE = 0;
+     	case (ctl_state)
+			`CTL_STATE_FETCH0: begin
+				sram_ADDR = pc[15:0];
+				sram_DI = 0;
+				sram_EN = 1;
+				sram_WE = 0;
+			end
+			`CTL_STATE_EXEC0: begin
+				if (opcode == `LD) //If we got LD opcode
+				begin
+					sram_ADDR = alu1[15:0];
+					sram_DI = 0;
+					sram_EN = 1;
+					sram_WE = 0;
+				end
+			end
+			`CTL_STATE_EXEC1: begin
+				if (opcode == `ST) //If we got ST opcode
+				begin
+					sram_ADDR = alu1[15:0];
+					sram_DI = alu0;
+					sram_EN = 1;
+					sram_WE = 1;
+				end
+			end
+			default: begin
+				sram_ADDR = 0;
+				sram_DI = 0;
+				sram_EN = 0;
+				sram_WE = 0;
+			end
+     	endcase
+	end
 
 endmodule // CTL
