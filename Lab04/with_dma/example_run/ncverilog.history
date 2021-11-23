@@ -1,0 +1,14 @@
+s1(23Nov2021:14:24:47):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s2(23Nov2021:14:26:55):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s3(23Nov2021:14:28:58):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s4(23Nov2021:14:31:27):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s5(23Nov2021:14:32:13):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s6(23Nov2021:14:32:45):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s7(23Nov2021:14:34:22):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s8(23Nov2021:14:34:58):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s9(23Nov2021:14:36:03):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s10(23Nov2021:14:36:37):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s11(23Nov2021:14:36:48):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s12(23Nov2021:14:37:44):  ncverilog +access+rw alu.v ctl.v sp.v sram_tb.v sram.v top.v 
+s13(23Nov2021:14:38:31):  ncverilog +access+rw alu.v ctl.v sp.v sram.v top.v 
+s14(23Nov2021:14:39:09):  ncverilog +access+rw alu.v ctl.v sp.v sram.v top.v 
