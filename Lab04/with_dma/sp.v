@@ -18,8 +18,9 @@ module SP(clk, reset, start);
    wire [31:0] aluout_wire;
 
    // instantiate ALU, CTL and SRAM modules
-   /***********************************
-    * TODO: fill here
-   **********************************/
+
    SRAM SRAM(clk, sram_ADDR, sram_DI, sram_EN, sram_WE, sram_DO);
+   CTL CTL(clk, reset, start, sram_ADDR, sram_DI, sram_EN, sram_WE, sram_DO, opcode, alu0, alu1, aluout_wire);
+   ALU ALU(opcode, alu0, alu1, aluout_wire);
+
 endmodule  
