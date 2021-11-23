@@ -182,8 +182,8 @@ module CTL(
 						default:  begin: compute
 							aluout <= aluout_wire;
 						end
-
 					endcase
+					ctl_state <= `CTL_STATE_EXEC1;
 				end
 
 				`CTL_STATE_EXEC1: begin
