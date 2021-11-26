@@ -1,5 +1,5 @@
 ncverilog(64): 15.20-s085: (c) Copyright 1995-2020 Cadence Design Systems, Inc.
-TOOL:	ncverilog	15.20-s085: Started on Nov 26, 2021 at 12:00:47 IST
+TOOL:	ncverilog	15.20-s085: Started on Nov 23, 2021 at 14:39:53 IST
 ncverilog
 	+access+rw
 	alu.v
@@ -43,9 +43,9 @@ ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): 
 ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
 |
 ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-Recompiling... reason: file './ctl.v' is newer than expected.
-	expected: Fri Nov 26 11:55:40 2021
-	actual:   Fri Nov 26 12:00:31 2021
+Recompiling... reason: file './alu.v' is newer than expected.
+	expected: Tue Nov 23 11:53:58 2021
+	actual:   Tue Nov 23 13:30:06 2021
 SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
 |
 ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
@@ -109,14 +109,14 @@ ncvlog_cg: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): 
 ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
 |
 ncvlog_cg: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-		worklib.CTL:v <0x5a5764fc>
-			streams:  24, words: 36716
+		worklib.CTL:v <0x6df931a6>
+			streams:  20, words: 26392
 	Building instance specific data structures.
 	Loading native compiled code:     .................... Done
 	Design hierarchy summary:
 		              Instances  Unique
 		Modules:              5       5
-		Registers:           39      39
+		Registers:           30      30
 		Scalar wires:         5       -
 		Vectored wires:       7       -
 		Always blocks:        5       5
@@ -218,6 +218,6 @@ time 3590: read mem[000a] -> 24000003
 time 3650: read mem[0003] -> 241c000b
 time 3710: read mem[000b] -> 30000000
 Simulation complete via $finish(1) at time 3760 NS + 1
-./ctl.v:330 							$finish;
+./ctl.v:229 							$finish;
 ncsim> exit
-TOOL:	ncverilog	15.20-s085: Exiting on Nov 26, 2021 at 12:00:55 IST  (total: 00:00:08)
+TOOL:	ncverilog	15.20-s085: Exiting on Nov 23, 2021 at 14:39:55 IST  (total: 00:00:02)

@@ -1,0 +1,3 @@
+s1(23Nov2021:13:16:32):  ncverilog +access+rw alu.v ctl.v sp.v sram.v top.v 
+s2(23Nov2021:13:23:48):  ncverilog +access+rw alu.v ctl.v sp.v sram.v top.v 
+s3(23Nov2021:14:39:53):  ncverilog +access+rw alu.v ctl.v sp.v sram.v top.v 
