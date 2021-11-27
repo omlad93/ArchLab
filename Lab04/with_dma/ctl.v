@@ -140,7 +140,7 @@ module CTL(
 			//dma additions
 			$fdisplay(verilog_trace_fp, "dma_state %08x", dma_state); 				
 			$fdisplay(verilog_trace_fp, "dma_status %08x", dma_status); 				
-			$fdisplay(verilog_trace_fp, "dma_transfer_size %08x", dma_size); 
+			//$fdisplay(verilog_trace_fp, "dma_transfer_size %08x", dma_size); 
 			$fdisplay(verilog_trace_fp, "dma_transfer_counter %08x\n", dma_counter);
 
 
@@ -397,7 +397,7 @@ module CTL(
 			end
 
 			`DMA_CPY: begin 
-				if (dma_counter < dma_size) begin :copy_dma
+				if (dma_counter < dma_size-1) begin :copy_dma
 					sram_ADDR = dma_dest[15:0];
 					sram_DI = sram_DO;
 					sram_EN = 1;
