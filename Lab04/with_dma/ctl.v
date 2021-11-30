@@ -156,6 +156,7 @@ module CTL(
 				// Our implementation: 
 
 				`CTL_STATE_FETCH0: begin : load_op_from_mem
+
 					dma_wait <= 0;
 					ctl_state <= `CTL_STATE_FETCH1;
 				end 
@@ -343,7 +344,7 @@ module CTL(
      	case (ctl_state)
 			`CTL_STATE_FETCH0: begin
 				sram_ADDR = pc[15:0];
-				sram_DI = 0;
+				// sram_DI = 0;
 				sram_EN = 1;
 				sram_WE = 0;
 			end
@@ -351,15 +352,15 @@ module CTL(
 				if (opcode == `LD) begin
 					dma_wait = 1;
 					sram_ADDR = alu1[15:0];
-					sram_DI = 0;
+					// sram_DI = 0;
 					sram_EN = 1;
 					sram_WE = 0;
 				end
 			end
 			`CTL_STATE_EXEC1: begin
 				if (opcode == `LD) begin : stop_read
-					sram_ADDR = 0;
-					sram_DI = 0;
+					// sram_ADDR = 0;
+					// sram_DI = 0;
 					sram_EN = 0;
 					sram_WE = 0;		
 				end else if (opcode == `ST) begin
@@ -370,10 +371,13 @@ module CTL(
 				end
 			end
 			default: begin
-				sram_ADDR = 0;
-				sram_DI = 0;
-				sram_EN = 0;
-				sram_WE = 0;
+				// sram_ADDR = 0;
+				// sram_DI = 0;
+				if (! dma_status) begin 
+					sram_EN = 0;
+					sram_WE = 0;
+				end
+				
 			end
      	endcase
 		case (dma_state)
@@ -385,27 +389,46 @@ module CTL(
 			end
 
 			`DMA_HOLD: begin
-				dma_state = (dma_wait) ? `DMA_HOLD : `DMA_READ;
+				if (!dma_wait) begin
+					dma_state = `DMA_READ;
+					sram_ADDR = dma_src[15:0];
+					// sram_DI = 0;
+					sram_EN = 1;
+					sram_WE = 0;
+				end else begin
+					dma_state = `DMA_HOLD;
+				end
 			end
 
 			`DMA_READ: begin
-				sram_ADDR = dma_src[15:0];
-				sram_DI = 0;
+				
 				sram_EN = 1;
-				sram_WE = 0;
+				sram_WE = 1;
+				sram_ADDR = dma_dest[15:0];
+
 				dma_state = `DMA_CPY;
 			end
 
 			`DMA_CPY: begin 
+				dma_data = sram_DO;
+				sram_DI = sram_DO;
 				if (dma_counter < dma_size-1) begin :copy_dma
-					sram_ADDR = dma_dest[15:0];
-					sram_DI = sram_DO;
-					sram_EN = 1;
-					sram_WE = 1;
-					dma_src = dma_src +1;
-					dma_dest = dma_dest +1;
-					dma_counter = dma_counter +1;
-					dma_state = (dma_wait) ? `DMA_HOLD : `DMA_READ;
+					dma_src <= dma_src +1;
+					dma_dest <= dma_dest +1;
+					dma_counter <= dma_counter +1;
+					
+					if (!dma_wait) begin
+						sram_ADDR = dma_src + 1;
+						// sram_DI = 0;
+						sram_EN = 1;
+						sram_WE = 0;
+						dma_state = `DMA_READ;
+					end else begin
+						sram_WE = 0;
+						dma_state = `DMA_HOLD ;
+					end
+
+					
 				end else begin : finished_dma
 					dma_counter = 0;
 					dma_size = 0;

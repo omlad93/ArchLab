@@ -1,5 +1,5 @@
 ncverilog(64): 15.20-s085: (c) Copyright 1995-2020 Cadence Design Systems, Inc.
-TOOL:	ncverilog	15.20-s085: Started on Nov 27, 2021 at 17:40:34 IST
+TOOL:	ncverilog	15.20-s085: Started on Nov 30, 2021 at 10:46:39 IST
 ncverilog
 	+access+rw
 	alu.v
@@ -43,32 +43,6 @@ ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): 
 ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
 |
 ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-Recompiling... reason: file './ctl.v' is newer than expected.
-	expected: Fri Nov 26 12:00:31 2021
-	actual:   Sat Nov 27 17:38:30 2021
-SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
-|
-ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
-DEFINE Cadence_libs ./Cadence_libs
-|
-ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
-ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
-|
-ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
-|
-ncvlog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
-DEFINE Cadence_libs ./Cadence_libs
-|
-ncvlog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
-ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
-|
-ncvlog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-file: ctl.v
-	module worklib.CTL:v
-		errors: 0, warnings: 0
-	Total errors/warnings found outside modules and primitives:
-		errors: 0, warnings: 3
 SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
 |
 ncverilog: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
@@ -87,42 +61,6 @@ ncverilog: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): 
 ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
 |
 ncverilog: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
-|
-ncelab: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
-DEFINE Cadence_libs ./Cadence_libs
-|
-ncelab: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
-ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
-|
-ncelab: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-		Caching library 'worklib' ....... Done
-	Elaborating the design hierarchy:
-	Building instance overlay tables: .................... Done
-	Generating native compiled code:
-SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
-|
-ncvlog_cg: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
-DEFINE Cadence_libs ./Cadence_libs
-|
-ncvlog_cg: *W,DLCPTH (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,15): cds.lib Permission denied '/a/../../../tools/cadence/IC/06.18.180/tools/dfII/local/Cadence_libs' (cds.lib command ignored).
-ASSIGN Cadence_libs COMBINE analogLib rfLib rfExamples ahdlLib passiveLib basic US_8ths
-|
-ncvlog_cg: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.lib Library not defined 'Cadence_libs' (cds.lib command ignored).
-		worklib.CTL:v <0x66ee1075>
-			streams:  24, words: 36102
-	Building instance specific data structures.
-	Loading native compiled code:     .................... Done
-	Design hierarchy summary:
-		              Instances  Unique
-		Modules:              5       5
-		Registers:           39      39
-		Scalar wires:         5       -
-		Vectored wires:       7       -
-		Always blocks:        5       5
-		Initial blocks:       2       2
-		Pseudo assignments:   3       3
-	Writing initial simulation snapshot: worklib.top:v
 SOFTINCLUDE $EMXHOME/emxinterface/cds.lib
 |
 ncsim: *W,DLCVAR (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,13): cds.lib Invalid environment variable ''.
@@ -135,45 +73,89 @@ ncsim: *W,DLCLIB (/tools/cadence/IC/06.18.180/tools/dfII/local/cds.lib,16): cds.
 Loading snapshot worklib.top:v .................... Done
 ncsim> source /tools/cadence/INCISIVE/15.20.085/tools/inca/files/ncsimrc
 ncsim> run
-time 110: read mem[0000] -> 00c10064
-time 170: read mem[0001] -> 00810000
-time 230: read mem[0002] -> 01810002
-time 290: read mem[0003] -> 11030000
-time 330: read mem[0064] -> 000000c8
-time 350: read mem[0004] -> 014103e8
-time 410: read mem[0005] -> 142c000a
-time 470: read mem[0006] -> 17800000
-time 490: read mem[03e8] -> 00000002
-time 500: write 17800000 -> mem[00c8]
-time 510: read mem[03e9] -> 00000003
-time 520: write 00000002 -> mem[00c9]
-time 530: read mem[0007] -> 12330000
-time 550: read mem[03ea] -> 00000004
-time 560: write 12330000 -> mem[00ca]
-time 570: read mem[03eb] -> 00000005
-time 580: write 00000004 -> mem[00cb]
-time 590: read mem[0008] -> 26160006
-time 610: read mem[03ec] -> 00000006
-time 620: write 26160006 -> mem[00cc]
-time 630: read mem[03ed] -> 00000007
-time 640: write 00000006 -> mem[00cd]
-time 650: read mem[0006] -> 17800000
-time 670: read mem[03ee] -> 00000008
-time 680: write 17800000 -> mem[00ce]
-time 690: read mem[03ef] -> 00000000
-time 700: write 00000008 -> mem[00cf]
-time 710: read mem[0007] -> 12330000
-time 730: read mem[03f0] -> 00000000
-time 740: write 12330000 -> mem[00d0]
-time 750: read mem[03f1] -> 00000000
-time 760: write 00000001 -> mem[0064]
-time 770: read mem[0008] -> 26160006
-time 830: read mem[0006] -> 17800000
-time 890: read mem[0007] -> 12330000
-time 940: write 00000000 -> mem[0064]
-time 950: read mem[0008] -> 26160006
-time 1010: read mem[0009] -> 30000000
-Simulation complete via $finish(1) at time 1060 NS + 1
+time 110: read mem[0000] -> 0088000f
+time 170: read mem[0001] -> 00c80001
+time 230: read mem[0002] -> 01080008
+time 290: read mem[0003] -> 241c000b
+time 350: read mem[0004] -> 11420000
+time 390: read mem[000f] -> 00000000
+time 410: read mem[0005] -> 00910001
+time 470: read mem[0006] -> 11820000
+time 510: read mem[0010] -> 00000001
+time 530: read mem[0007] -> 01b50000
+time 590: read mem[0008] -> 12320000
+time 640: write 00000001 -> mem[0010]
+time 650: read mem[0009] -> 00d90001
+time 710: read mem[000a] -> 24000003
+time 770: read mem[0003] -> 241c000b
+time 830: read mem[0004] -> 11420000
+time 870: read mem[0010] -> 00000001
+time 890: read mem[0005] -> 00910001
+time 950: read mem[0006] -> 11820000
+time 990: read mem[0011] -> 00000002
+time 1010: read mem[0007] -> 01b50000
+time 1070: read mem[0008] -> 12320000
+time 1120: write 00000003 -> mem[0011]
+time 1130: read mem[0009] -> 00d90001
+time 1190: read mem[000a] -> 24000003
+time 1250: read mem[0003] -> 241c000b
+time 1310: read mem[0004] -> 11420000
+time 1350: read mem[0011] -> 00000003
+time 1370: read mem[0005] -> 00910001
+time 1430: read mem[0006] -> 11820000
+time 1470: read mem[0012] -> 00000003
+time 1490: read mem[0007] -> 01b50000
+time 1550: read mem[0008] -> 12320000
+time 1600: write 00000006 -> mem[0012]
+time 1610: read mem[0009] -> 00d90001
+time 1670: read mem[000a] -> 24000003
+time 1730: read mem[0003] -> 241c000b
+time 1790: read mem[0004] -> 11420000
+time 1830: read mem[0012] -> 00000006
+time 1850: read mem[0005] -> 00910001
+time 1910: read mem[0006] -> 11820000
+time 1950: read mem[0013] -> 00000004
+time 1970: read mem[0007] -> 01b50000
+time 2030: read mem[0008] -> 12320000
+time 2080: write 0000000a -> mem[0013]
+time 2090: read mem[0009] -> 00d90001
+time 2150: read mem[000a] -> 24000003
+time 2210: read mem[0003] -> 241c000b
+time 2270: read mem[0004] -> 11420000
+time 2310: read mem[0013] -> 0000000a
+time 2330: read mem[0005] -> 00910001
+time 2390: read mem[0006] -> 11820000
+time 2430: read mem[0014] -> 00000005
+time 2450: read mem[0007] -> 01b50000
+time 2510: read mem[0008] -> 12320000
+time 2560: write 0000000f -> mem[0014]
+time 2570: read mem[0009] -> 00d90001
+time 2630: read mem[000a] -> 24000003
+time 2690: read mem[0003] -> 241c000b
+time 2750: read mem[0004] -> 11420000
+time 2790: read mem[0014] -> 0000000f
+time 2810: read mem[0005] -> 00910001
+time 2870: read mem[0006] -> 11820000
+time 2910: read mem[0015] -> 00000006
+time 2930: read mem[0007] -> 01b50000
+time 2990: read mem[0008] -> 12320000
+time 3040: write 00000015 -> mem[0015]
+time 3050: read mem[0009] -> 00d90001
+time 3110: read mem[000a] -> 24000003
+time 3170: read mem[0003] -> 241c000b
+time 3230: read mem[0004] -> 11420000
+time 3270: read mem[0015] -> 00000015
+time 3290: read mem[0005] -> 00910001
+time 3350: read mem[0006] -> 11820000
+time 3390: read mem[0016] -> 00000007
+time 3410: read mem[0007] -> 01b50000
+time 3470: read mem[0008] -> 12320000
+time 3520: write 0000001c -> mem[0016]
+time 3530: read mem[0009] -> 00d90001
+time 3590: read mem[000a] -> 24000003
+time 3650: read mem[0003] -> 241c000b
+time 3710: read mem[000b] -> 30000000
+Simulation complete via $finish(1) at time 3760 NS + 1
 ./ctl.v:330 							$finish;
 ncsim> exit
-TOOL:	ncverilog	15.20-s085: Exiting on Nov 27, 2021 at 17:40:36 IST  (total: 00:00:02)
+TOOL:	ncverilog	15.20-s085: Exiting on Nov 30, 2021 at 10:46:39 IST  (total: 00:00:00)
