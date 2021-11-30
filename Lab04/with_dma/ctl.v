@@ -411,7 +411,7 @@ module CTL(
 
 			`DMA_CPY: begin 
 				dma_data = sram_DO;
-				sram_DI = sram_DO;
+				// sram_DI = sram_DO;
 				if (dma_counter < dma_size-1) begin :copy_dma
 					dma_src <= dma_src +1;
 					dma_dest <= dma_dest +1;
@@ -440,5 +440,10 @@ module CTL(
 		endcase
 	end //sram_routine
 
+	always @(sram_DO) begin
+		if (dma_state == `DMA_CPY) begin
+			sram_DI <= sram_DO;
+		end	
+	end
 
 endmodule // CTL
