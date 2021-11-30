@@ -425,9 +425,10 @@ module CTL(
 						dma_state = `DMA_READ;
 					end else begin
 						sram_WE = 0;
+						sram_EN = 0;
+						// sram_EN = (ctl_state == `CTL_STATE_FETCH0) or ((ctl_state == `CTL_STATE_EXEC0) and (opcode=`LD)) or ((ctl_state == `CTL_STATE_EXEC1) and (opcode=`ST));
 						dma_state = `DMA_HOLD ;
 					end
-
 					
 				end else begin : finished_dma
 					dma_counter = 0;
