@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h> 
-#include <sys/socket.h>
-#include <netinet/in.h>
-
 #include "llsim.h"
 
 #define sp_printf(a...)						\
@@ -74,6 +70,17 @@ typedef struct sp_registers_s {
 	int exec1_alu0; // 32 bits
 	int exec1_alu1; // 32 bits
 	int exec1_aluout;
+
+	// DMA registers
+	
+	int dma_state; 	 // 2 bit dma state machine
+	int dma_size; 	 // size of transaction
+	int dma_counter; // counter of dma transaction
+	int dma_status;	 // 1 bit indicator for dma status : 1 is busy
+	int dma_src;	 // 32 bit source address for dma
+	int dma_dst;	 // 32 bit destination address fo dma
+
+
 } sp_registers_t;
 
 /*
@@ -136,9 +143,11 @@ static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR"
 #define is_jump(opcode) ((opcode <=JNE) && (opcode >= JIN))
 #define is_dma_op(opcode) ((opcode == CMB) || (opcode==POL))
 #define is_alu_op(opcode) ((opcode <= LHI) || is_dma_op(opcode))
+#define is_mem_op(opcode) ((opcode == LD) || (opcode == ST))
 #define structural_hazard_expected(opcode) ((spro->dec1_opcode == ST) && (opcode == LD) && (spro->dec1_active))
 #define src_is_real(src_reg) ((src_reg != 0) && (src_reg != 1))
 #define data_hazard_mem(spro,src) ((spro->exec0_active) && (spro->exec0_opcode == LD) && (spro->exec0_dst == src))
+#define not(x) (!(x))
 
 #define FE0_MASK 0x0000ffff
 #define DE0_MASK 0x0000001f
@@ -150,6 +159,12 @@ static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR"
 #define IMM_MASK 0xffff
 #define IMM_SHIFT 0x14
 
+#define DMA_STATE_IDLE		0
+#define DMA_STATE_HOLD		1
+#define DMA_STATE_COPY		2
+#define DMA_STATE_READ		3
+
+int dma_work =0;
 
 int stall_dec1_is_needed(sp_registers_t* spro, sp_t *sp){
 	int condition1 = (src_is_real(spro->dec1_src0) && (data_hazard_mem(spro, spro->dec1_src0)));
@@ -184,23 +199,139 @@ void stall_dec1(sp_registers_t *spro,sp_registers_t *sprn){
 	sprn->exec1_active = 0;
 }
 
+// prepare for dma operation
+void dma_preperation_dec1(sp_registers_t *spro, sp_registers_t *sprn){
+    switch (spro->dec1_opcode){
+        case CMB:
+			//sprn->dma_state = DMA_STATE_IDLE;		
+			sprn->dma_status = 1; //for next cycle
+            if (spro->dma_status == 0 ){
+				dma_work = 1;
+                sprn->dma_src = spro->r[spro->dec1_src0];
+                sprn->dma_dst = spro->r[spro->dec1_src1];
+                sprn->dma_size = spro->dec1_immediate;
+			}
+            break;
+        default:
+			break;
+    }
+}
+
 void alu_preperation_dec1(sp_registers_t* spro,sp_registers_t* sprn){
 	// TODO - Iris
 	// check data hazards
 }
 
-void alu_execute(sp_registers_t *spro,sp_registers_t *sprn, int a0, int a1){
+void alu_execute0(sp_t *sp, int a0, int a1){
+	sp_registers_t *spro = sp->spro;
+	sp_registers_t *sprn = sp->sprn;
 	// TODO - Iris
 	// like lab 2
+	switch (spro->exec0_opcode){
+		case ADD:
+			break;
+		case SUB:
+			break;
+		case LSF:
+			break;
+		case RSF:
+			break;
+		case AND:
+			break;
+		case OR:
+			break; 
+		case XOR:
+			break;
+		case LHI:
+			break;
+		case LD:
+			llsim_mem_read(sp->sramd, spro->exec0_alu1);
+			break; 
+		case ST:
+			break; 
+		case CMB:
+			sprn->exec1_aluout = spro->dma_status;
+			break;
+		case POL:
+			sprn->exec1_aluout = spro->dma_status;
+			break;
+		case JLT:
+			break;
+		case JLE:
+			break;
+		case JEQ:
+			break;
+		case JNE:
+			break;
+		case JIN:
+			break;
+		case HLT:
+			break;
+		default:
+			break;
 
 
-	//  also {if (spro->exec0_opcode == LD) llsim_mem_read(sp->sramd, alu1);}
+
+	}
+
 }
 
 void jump_execute(sp_registers_t *spro,sp_registers_t *sprn){
 	//  TODO - Iris
 }
 
+
+// perform the required preperation for next copy
+void dma_prepare_next_copy(sp_registers_t *spro, sp_registers_t *sprn, int block_dma){
+	int last_step;
+	sprn->dma_counter = spro->dma_counter + 1;
+	sprn->dma_dst = spro->dma_dst + 1;
+	sprn->dma_src = spro->dma_src + 1;
+
+	last_step = (sprn->dma_counter == sprn->dma_size);
+	if (last_step){
+		sprn->dma_status = 0;
+		sprn->dma_counter = 0;
+	}
+	sprn->dma_state = last_step ? DMA_STATE_IDLE : (block_dma ? DMA_STATE_HOLD : DMA_STATE_READ);
+}
+
+// the DMA state machine
+void dma_fsm(sp_t *sp){
+	int mem_extract;
+	sp_registers_t *spro = sp->spro;
+	sp_registers_t *sprn = sp->sprn;
+	int dec1_block = is_mem_op(spro->dec1_opcode) && spro->dec1_active;
+	int exe0_block = is_mem_op(spro->exec0_opcode) && spro->exec0_active;
+	int exe1_block = is_mem_op(spro->exec1_opcode) && spro->exec1_active;
+	int block_dma = (dec1_block || exe0_block || exe1_block);
+	
+	switch(spro->dma_state){
+		case DMA_STATE_IDLE:
+			if (dma_work){
+				sprn->dma_state =  DMA_STATE_HOLD;
+				sprn->dma_status = 1;
+			}
+			break;
+
+		case DMA_STATE_HOLD:
+			sprn->dma_state = (block_dma) ? DMA_STATE_HOLD: DMA_STATE_READ;
+			break;
+
+		case DMA_STATE_READ:
+			llsim_mem_read(sp->sramd, spro->dma_src);
+			sprn->dma_state = DMA_STATE_COPY;
+			break;
+
+		case DMA_STATE_COPY:
+			mem_extract = llsim_mem_extract_dataout(sp->sramd, 31, 0);
+			llsim_mem_set_datain(sp->sramd, mem_extract, 31, 0);
+			llsim_mem_write(sp->sramd, spro->dma_dst);
+			dma_prepare_next_copy(spro,sprn,block_dma);
+			break;
+	}
+
+}
 
 // end of our additional functionality
 //////////////////////////////////////////////////////////////
@@ -310,7 +441,7 @@ static void sp_ctl(sp_t *sp)
 	// dec0
 	sprn->dec1_active = spro->dec0_active ;
 	if (spro->dec0_active) {
-		opcode = (spro->dec0_inst >> DE0_SHIFT) & DE0_MASK;
+		int opcode = (spro->dec0_inst >> DE0_SHIFT) & DE0_MASK;
 		if (is_branch(opcode) && branch_predicted()){
 				// reset instructions in pipe line (branch taken)
 				sprn->fetch0_pc = spro->dec0_inst & DE0_MASK;
@@ -330,14 +461,13 @@ static void sp_ctl(sp_t *sp)
 			sprn->fetch0_pc = spro->fetch1_pc;
 		}
 		else {
-			instruction = spro->dec0_inst;
-			sprn->dec1_opcode = op;
-			sprn->dec1_dst = (instruction >> DST_SHIFT) & REG_MASK;
-			sprn->dec1_src0 = (instruction >> SR0_SHIFT) & REG_MASK;
-			sprn->dec1_src1 = (instruction >> SR1_SHIFT) & REG_MASK;
+			sprn->dec1_inst = spro->dec0_inst;
+			sprn->dec1_opcode = opcode;
+			sprn->dec1_dst = ((spro->dec0_inst) >> DST_SHIFT) & REG_MASK;
+			sprn->dec1_src0 = ((spro->dec0_inst) >> SR0_SHIFT) & REG_MASK;
+			sprn->dec1_src1 = ((spro->dec0_inst) >> SR1_SHIFT) & REG_MASK;
 			sprn->dec1_immediate = spro->dec0_inst & IMM_MASK;
 			sprn->dec1_immediate = ( sprn->dec1_immediate << IMM_SHIFT) >> IMM_SHIFT; // Sign Extention
-			sprn->dec1_inst = instruction;
 			sprn->dec1_pc = spro->dec0_pc;
 
 		}
@@ -350,6 +480,7 @@ static void sp_ctl(sp_t *sp)
 			stall_dec1(spro, sprn);
 		} else {
 			alu_preperation_dec1(spro, sprn);
+			dma_preperation_dec1(spro,sprn);
 			sprn->exec0_pc = spro->dec1_pc;
 			sprn->exec0_inst = spro->dec1_inst;
 			sprn->exec0_opcode = spro->dec1_opcode;
@@ -358,6 +489,7 @@ static void sp_ctl(sp_t *sp)
 			sprn->exec0_src1 = spro->dec1_src1;
 			sprn->exec0_immediate = spro->dec1_immediate;
 		}
+	}
 
 	// exec0
 	sprn->exec1_active = spro->exec0_active;
@@ -366,14 +498,14 @@ static void sp_ctl(sp_t *sp)
 	if (spro->exec0_active){
 		if(spro->exec0_opcode != NOP){
 			if (src_is_real(spro->exec0_src0)){
-				if ((spro->exec1_active) && (is_jump(spro->exec1_opcode) && (spro->exec0_src0 == 7)){
+				if ((spro->exec1_active) && (is_jump(spro->exec1_opcode) && (spro->exec0_src0 == 7))){
 					a0 = spro->exec1_pc;
-				} else if ((spro->exec1_active) && (is_alu_op(spro->exec1_opcode)) && (spro->exec1_dst == spro->exec0_src0) ){
+				} else if ((spro->exec1_active) && (is_alu_op(spro->exec1_opcode)) && (spro->exec1_dst == spro->exec0_src0)){
 					a0 = spro->exec1_aluout;
 				}
 			}
 			if (src_is_real(spro->exec0_src1)){
-				if ((spro->exec1_active) && (is_jump(spro->exec1_opcode) && (spro->exec0_src1 == 7)){
+				if ((spro->exec1_active) && (is_jump(spro->exec1_opcode) && (spro->exec0_src1 == 7))){
 					a1 = spro->exec1_pc;
 				} else if ((spro->exec1_active) && (is_alu_op(spro->exec1_opcode)) && (spro->exec1_dst == spro->exec0_src1) ){
 					a1 = spro->exec1_aluout;
@@ -381,13 +513,14 @@ static void sp_ctl(sp_t *sp)
 
 			}
 
-			alu_execute(spro, sprn, a0, a1);
-			// TODO - Omri - DMA behavioural 
+			alu_execute0(sp, a0, a1);
+
+		
 			sprn->exec1_inst = spro->exec0_inst;
 			sprn->exec1_pc = spro->exec0_pc;
 			sprn->exec1_opcode = spro->exec0_opcode;
-			sprn->exec1_alu0 = alu0;
-			sprn->exec1_alu1 = alu1;
+			sprn->exec1_alu0 = a0;
+			sprn->exec1_alu1 = a1;
 			sprn->exec1_dst = spro->exec0_dst;
 			sprn->exec1_src0 = spro->exec0_src0;
 			sprn->exec1_src1 = spro->exec0_src1;
@@ -416,7 +549,7 @@ static void sp_ctl(sp_t *sp)
 			dump_sram(sp, "srami_out.txt", sp->srami);
 			dump_sram(sp, "sramd_out.txt", sp->sramd);
 		} else {
-			instructions++;
+			nr_simulated_instructions++;
 			if (spro->exec1_opcode == ST){
 				llsim_mem_set_datain(sp->sramd, spro->exec1_alu0, 31, 0); 
 				llsim_mem_write(sp->sramd, spro->exec1_alu1);
@@ -424,22 +557,20 @@ static void sp_ctl(sp_t *sp)
 			else if (src_is_real(spro->exec1_dst) && (spro->exec1_opcode == LD)){
 				sprn->r[spro->exec1_dst] = llsim_mem_extract(sp->sramd, spro->exec1_alu1, 31, 0);
 			}
-			else if(spro->exec1_opcode == POL){
-				sprn->r[spro->exec1_dst] = spro->exec1_aluout;
-			}
-			} else if (is_jump(spro->exec1_opcode)){
+			else if (is_jump(spro->exec1_opcode)){
 				jump_execute(spro,sprn);
 
 			} else if (src_is_real(spro->exec1_dst) && is_alu_op(spro->exec1_opcode)){
 				sprn->r[spro->exec1_dst] = spro->exec1_aluout;
 			}
+			
 
 		}
 	}
 
 
 	// always:
-	// TODO - Omri - DMA behavioral 
+	dma_fsm(sp);
 }
 
 static void sp_run(llsim_unit_t *unit)

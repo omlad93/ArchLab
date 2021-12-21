@@ -20,7 +20,7 @@ void sp_init(char *program_name);
 
 #define llsim_error(args...) llsim_assert(0, args)
 
-static inline int bitmask0(bits)
+static inline int bitmask0(int bits)
 {
 	if (bits == 32)
 		return -1;
@@ -213,12 +213,4 @@ void llsim_mem_write(llsim_memory_t *memory, int addr);
 void llsim_mem_read(llsim_memory_t *memory, int addr);
 int llsim_mem_extract_dataout(llsim_memory_t *memory, int msb, int lsb);
 void llsim_run_clock(void);
-
-
-
-
-//   our additions:
-
-
-
 #endif
