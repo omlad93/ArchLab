@@ -213,4 +213,12 @@ void llsim_mem_write(llsim_memory_t *memory, int addr);
 void llsim_mem_read(llsim_memory_t *memory, int addr);
 int llsim_mem_extract_dataout(llsim_memory_t *memory, int msb, int lsb);
 void llsim_run_clock(void);
+
+
+
+
+//   our additions:
+
+
+
 #endif
