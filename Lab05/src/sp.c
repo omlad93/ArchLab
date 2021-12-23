@@ -139,12 +139,16 @@ static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR"
 #define increse_predictor() (branch_predictor = (branch_predictor <= 2) ? branch_predictor++ : branch_predictor)
 #define decrease_predictor() (branch_predictor = (branch_predictor > 0) ? branch_predictor-- : branch_predictor)
 #define branch_predicted() (branch_predictor > 1)
+#define brunch_taken(aluout) (aluout == 1)
 #define is_branch(opcode) ((opcode <=JNE) && (opcode >= JLT))
-#define is_jump(opcode) ((opcode <=JNE) && (opcode >= JIN))
+#define is_jump(opcode) ((opcode <=JIN) && (opcode >= JLT))
 #define is_dma_op(opcode) ((opcode == CMB) || (opcode==POL))
 #define is_alu_op(opcode) ((opcode <= LHI) || is_dma_op(opcode))
 #define is_mem_op(opcode) ((opcode == LD) || (opcode == ST))
-#define structural_hazard_expected(opcode) ((spro->dec1_opcode == ST) && (opcode == LD) && (spro->dec1_active))
+#define structural_hazard_expected(spro, opcode) ((spro->dec1_opcode == ST) && (opcode == LD) && (spro->dec1_active))
+#define exec1_data_hazard(spro, opcode, src) ((spro->exec1_dst == src) && (opcode == LD) && (spro->exec1_active))
+#define exec1_reg_hazard(spro, opcode, src) ((is_alu_op(opcode) || (opcode <= 10 && opcode >= 11)) && (spro->exec1_active) && (spro->exec1_dst == src))
+#define exec1_control_hazard(spro, opcode, src) ( (opcode == JIN) || (src == 7 && is_branch(opcode) && spro->exec1_active))
 #define src_is_real(src_reg) ((src_reg != 0) && (src_reg != 1))
 #define data_hazard_mem(spro,src) ((spro->exec0_active) && (spro->exec0_opcode == LD) && (spro->exec0_dst == src))
 #define not(x) (!(x))
@@ -158,6 +162,7 @@ static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR"
 #define DST_SHIFT 0x16
 #define IMM_MASK 0xffff
 #define IMM_SHIFT 0x14
+#define LHI_SHIFT 16
 
 #define DMA_STATE_IDLE		0
 #define DMA_STATE_HOLD		1
@@ -217,32 +222,71 @@ void dma_preperation_dec1(sp_registers_t *spro, sp_registers_t *sprn){
     }
 }
 
-void alu_preperation_dec1(sp_registers_t* spro,sp_registers_t* sprn){
-	// TODO - Iris
-	// check data hazards
+void alu_preperation_dec1(sp_t *sp, sp_registers_t* spro,sp_registers_t* sprn){
+	// prepare alu0
+	if(spro->dec1_src0 == 0){
+		sprn->exec0_alu0 = 0;
+	}
+	else if(spro->dec1_src0 == 1){
+		sprn->r[1] = spro->dec1_immediate;
+		sprn->exec0_alu0 = spro->dec1_immediate;
+	}
+	else if(exec1_data_hazard(spro, spro->exec1_opcode,spro->dec1_src0)){
+		sprn->exec0_alu0 = llsim_mem_extract_dataout(sp->sramd, 31, 0);
+	}
+	else if(exec1_control_hazard(spro, spro->exec1_opcode,spro->dec1_src0)){
+		sprn->exec0_alu0 = spro->exec1_pc;
+	}
+	else if(exec1_control_hazard(spro, spro->exec1_opcode,spro->dec1_src0)){
+		sprn->exec0_alu0 = spro->exec1_aluout;
+	}
+
+	// prepare alu1
+	if(spro->dec1_src1 == 0){
+		sprn->exec0_alu1 = 0;
+	}
+	else if(spro->dec1_src1 == 1){
+		sprn->r[1] = spro->dec1_immediate;
+		sprn->exec0_alu1 = spro->dec1_immediate;
+	}
+	else if(exec1_data_hazard(spro, spro->exec1_opcode,spro->dec1_src0)){
+		sprn->exec0_alu1 = llsim_mem_extract_dataout(sp->sramd, 31, 0);
+	}
+	else if(exec1_control_hazard(spro, spro->exec1_opcode,spro->dec1_src0)){
+		sprn->exec0_alu1 = spro->exec1_pc;
+	}
+	else if(exec1_control_hazard(spro, spro->exec1_opcode,spro->dec1_src0)){
+		sprn->exec0_alu1 = spro->exec1_aluout;
+	}
 }
 
 void alu_execute0(sp_t *sp, int a0, int a1){
 	sp_registers_t *spro = sp->spro;
 	sp_registers_t *sprn = sp->sprn;
-	// TODO - Iris
-	// like lab 2
 	switch (spro->exec0_opcode){
 		case ADD:
+			sprn->exec1_aluout = a0 + a1;
 			break;
 		case SUB:
+		sprn->exec1_aluout = a0 - a1;
 			break;
 		case LSF:
+		sprn->exec1_aluout = a0 << a1;
 			break;
 		case RSF:
+		sprn->exec1_aluout = a0 >> a1;
 			break;
 		case AND:
+		sprn->exec1_aluout = a0 & a1;
 			break;
 		case OR:
+		sprn->exec1_aluout = a0 | a1;
 			break; 
 		case XOR:
+		sprn->exec1_aluout = a0 ^ a1;
 			break;
 		case LHI:
+		sprn->exec1_aluout = (a0 & IMM_MASK) | (a1 << LHI_SHIFT);
 			break;
 		case LD:
 			llsim_mem_read(sp->sramd, spro->exec0_alu1);
@@ -256,14 +300,19 @@ void alu_execute0(sp_t *sp, int a0, int a1){
 			sprn->exec1_aluout = spro->dma_status;
 			break;
 		case JLT:
+		sprn->exec1_aluout = (a0 < a1) ? 1 : 0;
 			break;
 		case JLE:
+		sprn->exec1_aluout = (a0 <= a1) ? 1 : 0;
 			break;
 		case JEQ:
+		sprn->exec1_aluout = (a0 == a1) ? 1 : 0;
 			break;
 		case JNE:
+		sprn->exec1_aluout = (a0 != a1) ? 1 : 0;
 			break;
 		case JIN:
+			sprn->exec1_aluout = 1;
 			break;
 		case HLT:
 			break;
@@ -276,8 +325,44 @@ void alu_execute0(sp_t *sp, int a0, int a1){
 
 }
 
+
+void flush(sp_registers_t *spro,sp_registers_t *sprn, int next_pc){
+	if(((spro->fetch0_active) && (spro->fetch0_pc != next_pc)) || 
+	((spro->fetch1_active) && (spro->fetch1_pc != next_pc)) ||
+	((spro->dec0_active) && (spro->dec0_pc != next_pc)) ||
+	((spro->dec1_active) && (spro->dec1_pc != next_pc)) ||
+	((spro->exec0_active) && (spro->exec0_pc != next_pc))){
+		sprn->fetch0_active = 1;
+		sprn->fetch1_active = 0;
+		sprn->dec0_active = 0;
+		sprn->dec1_active = 0;
+		sprn->exec0_active = 0;
+		sprn->exec1_active = 0;
+		sprn->fetch0_pc = next_pc;
+	}
+
+}
+
 void jump_execute(sp_registers_t *spro,sp_registers_t *sprn){
-	//  TODO - Iris
+	int next_pc;
+
+	if(is_branch(spro->exec1_opcode)){
+		if(brunch_taken(spro->exec1_aluout)){
+			next_pc =  spro->exec1_immediate & IMM_MASK;
+			sprn->r[7] = spro->exec1_pc;
+			increse_predictor();
+		}
+		else{
+			next_pc = spro->exec1_pc + 1;
+			decrease_predictor();
+		}
+
+	}
+	else{ // not conditional -> JIN
+		next_pc = spro->exec1_alu0 & IMM_MASK;
+		sprn->r[7] = spro->exec1_pc;
+	}
+	flash(spro, sprn, next_pc);
 }
 
 
@@ -479,7 +564,7 @@ static void sp_ctl(sp_t *sp)
 		if (stall_dec1_is_needed(spro,sp)){
 			stall_dec1(spro, sprn);
 		} else {
-			alu_preperation_dec1(spro, sprn);
+			alu_preperation_dec1(sp, spro, sprn);
 			dma_preperation_dec1(spro,sprn);
 			sprn->exec0_pc = spro->dec1_pc;
 			sprn->exec0_inst = spro->dec1_inst;
