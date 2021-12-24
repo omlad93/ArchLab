@@ -536,7 +536,7 @@ static void sp_ctl(sp_t *sp)
 				sprn->fetch1_active = 0;
 				
 		}
-		else if (structural_hazard_expected(opcode)){
+		else if (structural_hazard_expected(spro, opcode)){
 			sprn->fetch1_active = 0;
 			sprn->dec1_active = 0;
 			sprn->dec0_pc = spro->dec0_pc;
