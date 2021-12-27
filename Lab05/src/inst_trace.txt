@@ -1,1 +1,1 @@
-program ..\..\Lab02\bin\dma.bin loaded, 1010 lines
+program ..\example\example.bin loaded, 23 lines
