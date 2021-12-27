@@ -1,0 +1,1 @@
+program ..\..\Lab02\bin\dma.bin loaded, 1010 lines
