@@ -15,6 +15,7 @@ int nr_simulated_instructions = 0;
 FILE *inst_trace_fp = NULL, *cycle_trace_fp = NULL;
 
 int branch_predictor = 0;
+int instructions = 0;
 
 typedef struct sp_registers_s {
 	// 6 32 bit registers (r[0], r[1] don't exist)
@@ -171,6 +172,84 @@ static char opcode_name[32][4] = {"ADD", "SUB", "LSF", "RSF", "AND", "OR", "XOR"
 
 int dma_work =0;
 
+void print_trace_file(sp_t* sp)
+{
+	fprintf(inst_trace_fp, "\n");
+	fprintf(inst_trace_fp, "--- instruction %d (%04x) @ PC %d (%04x) -----------------------------------------------------------\n",
+		instructions, instructions, sp->spro->exec1_pc, sp->spro->exec1_pc);
+	fprintf(inst_trace_fp, "pc = %04d, inst = %08x, opcode = %d (%s), dst = %d, src0 = %d, src1 = %d, immediate = %08x\n",
+		sp->spro->exec1_pc, sp->spro->exec1_inst, sp->spro->exec1_opcode, opcode_name[sp->spro->exec1_opcode],
+		sp->spro->exec1_dst, sp->spro->exec1_src0, sp->spro->exec1_src1, sbs(sp->spro->exec1_inst, 15, 0));
+	fprintf(inst_trace_fp, "r[0] = %08x r[1] = %08x r[2] = %08x r[3] = %08x \n",
+		0, sp->spro->exec1_immediate, sp->spro->r[2], sp->spro->r[3]);
+	fprintf(inst_trace_fp, "r[4] = %08x r[5] = %08x r[6] = %08x r[7] = %08x \n",
+		sp->spro->r[4], sp->spro->r[5], sp->spro->r[6], sp->spro->r[7]);
+	fprintf(inst_trace_fp, "\n");
+
+	switch (sp->spro->exec1_opcode)
+	{
+	case ADD:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d ADD %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case SUB:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d SUB %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case AND:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d AND %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case OR:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d OR %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case XOR:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d XOR %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case LHI:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d][31:16] = 0x%04x <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_immediate & 0xFFFF);
+		break;
+	case LSF:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d LSF %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case RSF:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = %d RSF %d <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu0, sp->spro->exec1_alu1);
+		break;
+	case LD:
+		fprintf(inst_trace_fp, ">>>> EXEC: R[%d] = MEM[%d] = %08x <<<<\n", sp->spro->exec1_dst, sp->spro->exec1_alu1,
+			llsim_mem_extract_dataout(sp->sramd, 31, 0));
+		break;
+	case ST:
+		fprintf(inst_trace_fp, ">>>> EXEC: MEM[%d] = R[%d] = %08x <<<<\n", sp->spro->exec1_alu1, sp->spro->exec1_src0, sp->spro->exec1_alu0);
+		break;
+	case JIN:
+		fprintf(inst_trace_fp, ">>>> EXEC: JIN %d <<<<\n", sp->spro->exec1_alu0 & 0x0000FFFF);
+		break;
+	case HLT:
+		fprintf(inst_trace_fp, ">>>> EXEC: HALT at PC %04x<<<<\n", sp->spro->exec1_pc);
+		break;
+	case JLT:
+		fprintf(inst_trace_fp, ">>>> EXEC: JLT %d, %d, %d <<<<\n", sp->spro->exec1_alu0, sp->spro->exec1_alu1, sp->spro->exec1_aluout ? sp->spro->exec1_immediate & 0x0000FFFF : sp->spro->exec1_pc + 1);
+		break;
+	case JLE:
+		fprintf(inst_trace_fp, ">>>> EXEC: JLE %d, %d, %d <<<<\n", sp->spro->exec1_alu0, sp->spro->exec1_alu1, sp->spro->exec1_aluout ? sp->spro->exec1_immediate & 0x0000FFFF : sp->spro->exec1_pc + 1);
+		break;
+	case JEQ:
+		fprintf(inst_trace_fp, ">>>> EXEC: JEQ %d, %d, %d <<<<\n", sp->spro->exec1_alu0, sp->spro->exec1_alu1, sp->spro->exec1_aluout ? sp->spro->exec1_immediate & 0x0000FFFF : sp->spro->exec1_pc + 1);
+		break;
+	case JNE:
+		fprintf(inst_trace_fp, ">>>> EXEC: JNE %d, %d, %d <<<<\n", sp->spro->exec1_alu0, sp->spro->exec1_alu1, sp->spro->exec1_aluout ? sp->spro->exec1_immediate & 0x0000FFFF : sp->spro->exec1_pc + 1);
+		break;
+	case CMB: // DMA
+		fprintf(inst_trace_fp, ">>>> EXEC: CMB  %d words from address %04x to adress %04x <<<\n", sp->spro->dma_size , sp->spro->dma_src, sp->spro->dma_dst);
+		break;
+	case POL: // DMA
+		fprintf(inst_trace_fp, ">>>> EXEC: POL dma status sampled by register %d <<<<\n", sp->spro->exec1_dst);
+		break;
+	default:
+		break;
+	}
+}
+
+
+
 int stall_dec1_is_needed(sp_registers_t* spro, sp_t *sp){
 	int condition1 = (src_is_real(spro->dec1_src0) && (data_hazard_mem(spro, spro->dec1_src0)));
 	int condition2 = (src_is_real(spro->dec1_src1) && (data_hazard_mem(spro, spro->dec1_src1)));
@@ -265,8 +344,7 @@ void alu_preperation_dec1(sp_t *sp, sp_registers_t* spro,sp_registers_t* sprn){
 	}
 }
 
-void 
-alu_execute0(sp_t *sp, int a0, int a1){
+void alu_execute0(sp_t *sp, int a0, int a1){
 	sp_registers_t *spro = sp->spro;
 	sp_registers_t *sprn = sp->sprn;
 	switch (spro->exec0_opcode){
@@ -295,7 +373,7 @@ alu_execute0(sp_t *sp, int a0, int a1){
 			sprn->exec1_aluout = (a0 & IMM_MASK) | (a1 << LHI_SHIFT);
 			break;
 		case LD:
-			llsim_mem_read(sp->sramd, spro->exec0_alu1);
+			llsim_mem_read(sp->sramd, a1);
 			break; 
 		case ST:
 			break; 
@@ -563,14 +641,24 @@ static void sp_ctl(sp_t *sp)
 	sprn->dec1_active = spro->dec0_active ;
 	if (spro->dec0_active) {
 		int opcode = (spro->dec0_inst >> DE0_SHIFT) & DE0_MASK;
-		if (is_branch(opcode) && branch_predicted()){
+		/*if (is_branch(opcode)){
+			if(branch_predicted()){
 				// reset instructions in pipe line (branch taken)
 				sprn->fetch0_pc = spro->dec0_inst & DE0_MASK;
 				sprn->fetch0_active = 1;
 				sprn->dec0_active = 0;
 				sprn->dec1_active = 0;
 				sprn->fetch1_active = 0;
+			}
 				
+		}*/
+		if (is_branch(opcode) && branch_predicted()){
+				// reset instructions in pipe line (branch taken)
+				sprn->fetch0_pc = spro->dec0_inst & DE0_MASK;
+				sprn->fetch0_active = 1;
+				sprn->dec0_active = 0;
+				sprn->dec1_active = 0;
+				sprn->fetch1_active = 0;				
 		}
 		else if (structural_hazard_expected(spro, opcode)){
 			sprn->fetch1_active = 0;
@@ -660,11 +748,11 @@ static void sp_ctl(sp_t *sp)
 			sprn->exec1_immediate = spro->exec1_immediate;
 		}
 
-	}
+	}  
 
 	// exec1
 	if (spro->exec1_active) {
-		// FILL HERE
+		print_trace_file(sp);
 		if (spro->exec1_opcode == HLT) {
 			llsim_stop();
 			dump_sram(sp, "srami_out.txt", sp->srami);
@@ -685,7 +773,7 @@ static void sp_ctl(sp_t *sp)
 				sprn->r[spro->exec1_dst] = spro->exec1_aluout;
 			}
 			
-
+			instructions++;
 		}
 	}
 
