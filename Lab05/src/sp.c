@@ -491,6 +491,7 @@ void dma_prepare_next_copy(sp_registers_t *spro, sp_registers_t *sprn, int block
 	if (last_step){
 		sprn->dma_status = 0;
 		sprn->dma_counter = 0;
+		dma_work = 0;
 	}
 	sprn->dma_state = last_step ? DMA_STATE_IDLE : (block_dma ? DMA_STATE_HOLD : DMA_STATE_READ);
 }
